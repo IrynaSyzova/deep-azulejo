@@ -18,14 +18,6 @@ def rearrange(tile, min_size, max_size):
 
         fragments.append(curr)
 
-        fragments.append(curr.flip_vertical())
-        fragments.append(curr.flip_horizontal())
-        fragments.append(curr.flip_transpose())
-
-        fragments.append(curr.rotate(clockwise=True))
-        fragments.append(curr.rotate(clockwise=True).rotate(clockwise=True))
-        fragments.append(curr.rotate(clockwise=True).rotate(clockwise=True).rotate(clockwise=True))
-
         if curr.get_rhombus().dims[0] >= min_size:
             fragments.append(curr.get_rhombus())
             to_fragment.append(curr.get_rhombus())
