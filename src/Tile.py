@@ -3,20 +3,50 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+
 class Tile:
+    """
+    Class for creating and manipulating a single tile.
+
+    Attributes:
+        img: image, assumed to have 1 tile in it
+    """
+
     def __init__(self, img):
         self.img = img
         self.dims = img.shape
-    
+
     # Plotting
     @classmethod
     def plot(cls, tile):
+        """
+        Plots a tile
+
+        :param tile: tile to plot
+        """
         plt.imshow(tile.img)
         plt.axis('off')
         plt.show()
 
     @classmethod
     def plot_grid(cls, tile_list, rows=None, cols=None):
+        """
+        Plots tiles in tile_list in a grid of rows x cols.
+
+        If none rows and cols are specified, plots every tile in tile_list in
+        square grid of ceil(len(tile_list) ** 0.5).
+
+        If one of rows and cols are specified, figures out the other dim as
+        ceil(len(tile_list) / <given dimension>).
+
+        If rows * cols > len(tile_list), add empty cells to the grid.
+
+        If rows * cols < len(tile_list), samples rows * cols elements from tile_list.
+
+        :param tile_list: list of tiles to plot
+        :param rows: grid dimension: rows
+        :param cols: grip dimension: cols
+        """
         if (rows is None) or (rows == 0) or (rows > len(tile_list)):
             if (cols is None) or (cols == 0):
                 rows = int(math.ceil(len(tile_list) ** 0.5))
@@ -30,13 +60,13 @@ class Tile:
             print('Nothing to plot')
             return
 
-        if rows*cols >= len(tile_list):
-            tile_list_plot = np.array(tile_list + [np.nan]*(rows*cols - len(tile_list))).reshape(rows, cols)
+        if rows * cols >= len(tile_list):
+            tile_list_plot = np.array(tile_list + [np.nan] * (rows * cols - len(tile_list))).reshape(rows, cols)
 
         else:
-            tile_list_plot = np.random.choice(tile_list, size=(rows,cols), replace=False)
+            tile_list_plot = np.random.choice(tile_list, size=(rows, cols), replace=False)
 
-        fig, ax = plt.subplots(rows, cols, figsize=(16, (16/cols)*rows))
+        fig, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
 
         if rows == 1:
             for col in range(cols):
@@ -60,10 +90,10 @@ class Tile:
     # Flipping
     def flip_vertical(self):
         return Tile(cv2.flip(self.img, 0))
-    
+
     def flip_horizontal(self):
         return Tile(cv2.flip(self.img, 1))
-    
+
     def flip_transpose(self):
         return Tile(cv2.transpose(self.img))
 
@@ -72,21 +102,40 @@ class Tile:
             return self.flip_transpose().flip_horizontal()
         else:
             return self.flip_transpose().flip_vertical()
-    
+
     # Cutting
     def get_quadrant(self, row, col):
-        if not(row in (0, 1) and col in (0, 1)):
-            raise Exception()
-        
-        row_start = self.dims[0]//2*row
-        row_end = row_start + self.dims[0]//2
+        """
+        Cuts out a quadrant from itself.
 
-        col_start = self.dims[1]//2*col
-        col_end = col_start + self.dims[1]//2
+        row=0, col=0: upper left
+        row=0, col=1: upper right
+        row-1, col=0: lower left
+        row-1, col=0: lower right
+
+        :param row: index of quadrant to cut
+        :param col: index of quadrant to cut
+        :return: new tile cut out from current tile
+        """
+        if not (row in (0, 1) and col in (0, 1)):
+            raise Exception()
+
+        row_start = self.dims[0] // 2 * row
+        row_end = row_start + self.dims[0] // 2
+
+        col_start = self.dims[1] // 2 * col
+        col_end = col_start + self.dims[1] // 2
 
         return Tile(self.img[row_start:row_end, col_start:col_end])
 
     def get_square_from_center(self, ratio=0.8):
+        """
+        Cuts sub-tile from center of itself.
+        Size of result is equal ratio * size of self.
+
+        :param ratio: relative size of new tile
+        :return: new tile cut out from current tile
+        """
         if ratio >= 1 or ratio <= 0:
             raise Exception()
 
@@ -99,50 +148,73 @@ class Tile:
         return Tile(self.img[row_start:row_end, col_start:col_end])
 
     def get_rhombus(self):
+        """
+        Cuts out a rhombus from self, where vertices of rhombus are centers of edges of self.
+
+        :return: new tile cut out from current tile
+        """
         # Cutting points
         cut_points = np.array([
-            [0              , self.dims[1]//2], 
-            [self.dims[0]//2, 0              ],
-            [self.dims[0]   , self.dims[1]//2], 
-            [self.dims[0]//2, self.dims[1]   ]
+            [0, self.dims[1] // 2],
+            [self.dims[0] // 2, 0],
+            [self.dims[0], self.dims[1] // 2],
+            [self.dims[0] // 2, self.dims[1]]
         ])
 
         rect = cv2.minAreaRect(cut_points)
         box = cv2.boxPoints(rect)
         box = np.int0(box)
-        
+
         width = int(rect[1][0])
         height = int(rect[1][1])
-        
+
         src_pts = box.astype("float32")
         # Straightened
-        dst_pts = np.array([[0, height-1],
+        dst_pts = np.array([[0, height - 1],
                             [0, 0],
-                            [width-1, 0],
-                            [width-1, height-1]], dtype="float32")
-        
+                            [width - 1, 0],
+                            [width - 1, height - 1]], dtype="float32")
+
         M = cv2.getPerspectiveTransform(src_pts, dst_pts)
         warped = cv2.warpPerspective(self.img, M, (width, height))
         return Tile(warped)
 
     # Assembling
     def assemble_quadrant_radial(self, row, col):
-        if not(row in (0, 1) and col in (0, 1)):
+        """
+        Assembles new tile by mirrowing and attaching self, starting from position row, col.
+
+        row=0, col=0: lower left
+        row-0, col=1: lower right
+        row=1, col=0: upper left
+        row=1, col=1: upper right
+
+        :param row: position to start assembling from
+        :param col: position to start assembling from
+        :return: new tile glued from current tile
+        """
+        if not (row in (0, 1) and col in (0, 1)):
             raise Exception()
-        
+
         if row == 0:
             img_vertical = np.concatenate((self.img, self.flip_vertical().img), axis=0)
         else:
             img_vertical = np.concatenate((self.flip_vertical().img, self.img), axis=0)
-        
+
         if col == 0:
             img_full = np.concatenate((img_vertical, Tile(img_vertical).flip_horizontal().img), axis=1)
         else:
             img_full = np.concatenate((Tile(img_vertical).flip_horizontal().img, img_vertical), axis=1)
-        
+
         return Tile(img_full)
 
     def assemble_quadrant_circular(self, clockwise=True):
+        """
+        Assembles new tile by rotating and attaching self, clockwise or counter-clockwise.
+
+        :param clockwise: direction
+        :return: new tile glued from current tile
+        """
         new_size = min(self.dims[0], self.dims[1])
         new_img = self.img[self.dims[0] - new_size:self.dims[0], self.dims[1] - new_size:self.dims[1]]
 
@@ -158,3 +230,4 @@ class Tile:
         return Tile(img_full)
 
     # Checks
+    # To do: symmetry checks

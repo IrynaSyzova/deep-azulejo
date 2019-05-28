@@ -7,6 +7,14 @@ from src import Tile
 
 
 def rearrange(tile, min_size, max_size):
+    """
+    Creates a list of new tiles obtained by cutting and gluing current tile.
+
+    :param tile: starting tile
+    :param min_size: minimum size of obtained tile
+    :param max_size: maximum size of obtained tile
+    :return: list of generated tiles
+    """
     to_fragment = deque()
     to_augment = deque()
     fragments = deque()
@@ -45,6 +53,12 @@ def rearrange(tile, min_size, max_size):
 
 
 def colour(tile):
+    """
+    Returns a list of tiles obtained from starting tile by recolouring it.
+
+    :param tile: starting tile
+    :return: list of recoloured tiles
+    """
     img = tile.img
     channels = product([0, 1, 2], repeat=3)
     return [Tile.Tile(np.array([img[..., _[0]], img[..., _[1]], img[..., _[2]]]).transpose())
@@ -53,6 +67,14 @@ def colour(tile):
 
 
 def enrich(tile, min_size, max_size):
+    """
+    Rearranges and recolours starting tile to obtained a list of new tiles.
+
+    :param tile: starting tile
+    :param min_size: minimum size of obtained tile
+    :param max_size: maximum size of obtained tile
+    :return: list of generated tiles
+    """
     rearranged = deque(rearrange(tile, min_size, max_size))
     result = deque()
     while rearranged:
