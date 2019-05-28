@@ -3,7 +3,7 @@ import numpy as np
 from collections import deque
 from itertools import product
 
-from src.Tile import Tile
+from src import Tile
 
 
 def rearrange(tile, min_size, max_size):
@@ -47,7 +47,7 @@ def rearrange(tile, min_size, max_size):
 def colour(tile):
     img = tile.img
     channels = product([0, 1, 2], repeat=3)
-    return [Tile(np.array([img[..., _[0]], img[..., _[1]], img[..., _[2]]]).transpose())
+    return [Tile.Tile(np.array([img[..., _[0]], img[..., _[1]], img[..., _[2]]]).transpose())
             for _ in channels
             if len(set(_)) > 1]
 

@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-from math import ceil
+import math
 
 class Tile:
     def __init__(self, img):
@@ -19,12 +19,12 @@ class Tile:
     def plot_grid(cls, tile_list, rows=None, cols=None):
         if (rows is None) or (rows == 0) or (rows > len(tile_list)):
             if (cols is None) or (cols == 0):
-                rows = int(ceil(len(tile_list) ** 0.5))
-                cols = int(ceil(len(tile_list) / rows))
+                rows = int(math.ceil(len(tile_list) ** 0.5))
+                cols = int(math.ceil(len(tile_list) / rows))
             else:
-                rows = int(ceil(len(tile_list) / cols))
+                rows = int(math.ceil(len(tile_list) / cols))
         elif (cols is None) or (cols == 0) or (rows > len(tile_list)):
-            cols = int(ceil(len(tile_list) / rows))
+            cols = int(math.ceil(len(tile_list) / rows))
 
         if (rows == 0) or (cols == 0):
             print('Nothing to plot')
