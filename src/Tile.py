@@ -7,6 +7,7 @@ import math
 class Tile:
     """
     Class for creating and manipulating a single tile.
+    Tiles are assumed to be square.
 
     Attributes:
         img: image, assumed to have 1 tile in it
@@ -33,7 +34,7 @@ class Tile:
         """
         Plots tiles in tile_list in a grid of rows x cols.
 
-        If none rows and cols are specified, plots every tile in tile_list in
+        If none rows and cols are None, plots every tile in tile_list in
         square grid of ceil(len(tile_list) ** 0.5).
 
         If one of rows and cols are specified, figures out the other dim as
@@ -67,7 +68,11 @@ class Tile:
             tile_list_plot = np.random.choice(tile_list, size=(rows, cols), replace=False)
 
         fig, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
+        # 16 is the right width for my screen
+        # height is calculated to keep same distance horizontally and vertically between plotted tiles
 
+        # if rows ==1 or cols == 1 then plr.subplots(rows, cols) will create a vector of axis
+        # otherwise subplots(roxws, cols) will create a matrix of axis
         if rows == 1:
             for col in range(cols):
                 ax[col].imshow(tile_list[col].img)
@@ -118,7 +123,7 @@ class Tile:
         :return: new tile cut out from current tile
         """
         if not (row in (0, 1) and col in (0, 1)):
-            raise Exception()
+            raise Exception('Row and col must be either 0 or 1')
 
         row_start = self.dims[0] // 2 * row
         row_end = row_start + self.dims[0] // 2
@@ -137,7 +142,7 @@ class Tile:
         :return: new tile cut out from current tile
         """
         if ratio >= 1 or ratio <= 0:
-            raise Exception()
+            raise Exception('Ratop must be between 0 and 1')
 
         row_start = int(self.dims[0] * (1 - ratio) / 2.0)
         row_end = int(self.dims[0] * (1 + ratio) / 2.0)
@@ -180,37 +185,67 @@ class Tile:
         return Tile(warped)
 
     # Assembling
-    def assemble_quadrant_radial(self, row, col):
+    def assemble_quadrant_unfold(self, row, col):
         """
-        Assembles new tile by mirrowing and attaching self, starting from position row, col.
+        Assembles new tile by mirrowing and attaching self, starting from position row, col:
 
-        row=0, col=0: lower left
-        row-0, col=1: lower right
-        row=1, col=0: upper left
-        row=1, col=1: upper right
+        AB    AB | BA
+        CD => CD | DC
+              -------
+              CD | DC
+              AB | BA
+
+        row=0, col=0: upper left
+        row-0, col=1: upper right
+        row=1, col=0: lower left
+        row=1, col=1: lower right
 
         :param row: position to start assembling from
         :param col: position to start assembling from
         :return: new tile glued from current tile
         """
         if not (row in (0, 1) and col in (0, 1)):
-            raise Exception()
+            raise Exception('Row and col must be either 0 or 1')
 
-        if row == 0:
-            img_vertical = np.concatenate((self.img, self.flip_vertical().img), axis=0)
-        else:
-            img_vertical = np.concatenate((self.flip_vertical().img, self.img), axis=0)
+        seed_img = self.img
 
-        if col == 0:
-            img_full = np.concatenate((img_vertical, Tile(img_vertical).flip_horizontal().img), axis=1)
-        else:
-            img_full = np.concatenate((Tile(img_vertical).flip_horizontal().img, img_vertical), axis=1)
+        if row == 1:
+            seed_img = cv2.flip(self.img, 0)
 
-        return Tile(img_full)
+        if col == 1:
+            seed_img = cv2.flip(self.img, 1)
 
-    def assemble_quadrant_circular(self, clockwise=True):
+        result = np.concatenate(
+            (
+                np.concatenate(
+                    (
+                        seed_img,
+                        cv2.flip(seed_img, 0)
+                    ),
+                    axis=0
+                ),
+                np.concatenate(
+                    (
+                        cv2.flip(seed_img, 1),
+                        cv2.flip(cv2.flip(seed_img, 0), 1)
+                    ),
+                    axis=0
+                )
+            ),
+            axis=1
+        )
+
+        return Tile(result)
+
+    def assemble_quadrant_windmill(self, clockwise=True):
         """
         Assembles new tile by rotating and attaching self, clockwise or counter-clockwise.
+
+        AB    AB | CA
+        CD => CD | DB
+              -------
+              BD | DC
+              AC | BA
 
         :param clockwise: direction
         :return: new tile glued from current tile

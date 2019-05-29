@@ -32,22 +32,25 @@ def rearrange(tile, min_size, max_size):
             to_augment.append(curr.get_rhombus())
 
         if curr.get_quadrant(0, 0).dims[0] >= min_size:
-            fragments.append(curr.get_quadrant(0, 0))
-            fragments.append(curr.get_quadrant(0, 1))
-            fragments.append(curr.get_quadrant(1, 0))
-            fragments.append(curr.get_quadrant(1, 1))
+            for i in range(0, 2):
+                for j in range(0, 2):
+                    fragments.append(curr.assemble_quadrant_unfold(i, j))
 
         if curr.dims[0] * 4 <= max_size:
             to_augment.append(curr)
 
     while to_augment:
         curr = to_augment.pop()
+        fragments.append(curr.get_rhombus())
+
         if curr.dims[0] * 4 <= max_size:
-            fragments.append(curr.assemble_quadrant_radial(0, 0))
-            fragments.append(curr.assemble_quadrant_radial(1, 0))
-            fragments.append(curr.assemble_quadrant_radial(0, 1))
-            fragments.append(curr.assemble_quadrant_radial(1, 1))
-            fragments.append(curr.assemble_quadrant_circular())
+            for i in range(0, 2):
+                for j in range(0, 2):
+                    fragments.append(curr.assemble_quadrant_unfold(i, j))
+                    to_augment.append(curr.assemble_quadrant_unfold(i, j))
+
+            fragments.append(curr.assemble_quadrant_windmill())
+            to_augment.append(curr.assemble_quadrant_windmill())
 
     return fragments
 
