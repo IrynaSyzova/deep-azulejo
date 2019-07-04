@@ -1,0 +1,6 @@
+data/
+*.csv
+*credentials*
+.ipynb_checkpoints/
+*csv
+data/
