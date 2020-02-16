@@ -3,3 +3,6 @@ dataset/
 *.csv
 *credentials*
 .ipynb_checkpoints/
+*.idea/
+*__pycache__/
+*venv/
