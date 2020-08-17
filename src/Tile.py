@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import math
+import warnings
 
 
 class Tile:
@@ -14,6 +15,8 @@ class Tile:
     """
 
     def __init__(self, img):
+        new_shape = min(img.shape[0], img.shape[1])
+        img = img[0:new_shape, 0:new_shape, ...]
         self.img = img
         self.dims = img.shape
 
@@ -132,6 +135,38 @@ class Tile:
         col_end = col_start + self.dims[1] // 2
 
         return Tile(self.img[row_start:row_end, col_start:col_end])
+    
+    def get_pieces(self, n = 9):
+        """
+        Returns n pieces; original image is cut in sqrt(n) by row and col
+
+        :param n: number of pieces to cut
+        :return: n new tiles cut out from current tile
+        """
+        per_dim = int(n**0.5)
+        shape = self.img.shape
+        
+        if per_dim**2 != n:
+            warnings.Warning('{n} should be a square number. Proceeding with {per_dim}x{per_dim}'.format(
+                n=n, per_dim=per_dim
+            ))
+            
+        img = cv2.resize(self.img, (per_dim**2*shape[0], per_dim**2*shape[1]))
+        
+        tile_list = []
+        
+        for i in range(per_dim):
+            for j in range(per_dim):
+                row_start = self.dims[0] // per_dim * i
+                row_end = self.dims[0] // per_dim * (i+1)
+
+                col_start = self.dims[1] // per_dim * j
+                col_end = self.dims[1] // per_dim * (j+1)
+                
+                tile_list.append(Tile(self.img[row_start:row_end, col_start:col_end]))
+
+        return tile_list
+        
 
     def get_square_from_center(self, ratio=0.8):
         """
