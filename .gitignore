@@ -1,6 +1,7 @@
 data/
 dataset/
 *.csv
+*.txt
 *credentials*
 .ipynb_checkpoints/
 *.idea/
