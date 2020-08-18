@@ -1,3 +1,6 @@
+"""
+Utility functions to inflate dataset by creating new images from old ones.
+"""
 import numpy as np
 
 from collections import deque
