@@ -46,5 +46,6 @@ def get_square_imgs(img_list, folder = '', tolerance=0.1, plot_aspect_ratios=Tru
         plt.gca().axhline(1 + tolerance, color='red')
         title = 'Aspect ratios of the images'
         plt.title(title)
+        plt.show()
         
     return sample_square
