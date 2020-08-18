@@ -1,5 +1,6 @@
 data/
 dataset/
+lists/
 *.csv
 *.txt
 *credentials*
