@@ -34,7 +34,7 @@ def get_tile_contrast(tile, n_pieces=25):
 
 def get_tile_symmetry(tile, metric='structural_similarity'):
     """
-    Check tile's symmetry horizontally, vertically, and diagonally
+    Checks tile's symmetry horizontally, vertically, and diagonally; returns best of them.
     :param tile: object of class Tile
     :param metric: metric to check; 
         current possible values are `structural_similarity` or `normalized_root_mse`
