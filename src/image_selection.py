@@ -8,6 +8,18 @@ import matplotlib.pyplot as plt
 
 from src import image_metrics
 from src.Tile import Tile
+import warnings
+
+
+def select_imgs(img_list, folder, func, **kwargs):
+    """
+
+    :param img_list:
+    :param folder:
+    :param func:
+    :param kwargs:
+    :return:
+    """
 
 
 def get_square_imgs(img_list, folder = '', tolerance=0.1, plot_aspect_ratios=True):
