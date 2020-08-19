@@ -38,10 +38,12 @@ def get_square_imgs(img_list, folder = '', tolerance=0.1, plot_aspect_ratios=Tru
             sample_square.append(img_file)
 
     if plot_aspect_ratios:
-        plt.plot(sorted(aspect_ratios));
-        plt.gca().axhline(1 + tolerance, color='red')
+        fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+
+        ax.plot(sorted(aspect_ratios))
+        ax.axhline(1 + tolerance, color='red')
         title = 'Aspect ratios of the images'
-        plt.title(title)
+        ax.set_title(title)
         plt.show()
         
     return sample_square
@@ -69,16 +71,17 @@ def get_contrast_imgs(img_list, folder = '', min_contrast=0.25, n_pieces=25, plo
             sample_contrasting.append(img_file)
 
     if plot_contrasts:
-        plt.plot(sorted(contrast_measure_list));
-        plt.gca().axhline(min_contrast, color='red')
+        fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+        ax.plot(sorted(contrast_measure_list))
+        ax.axhline(min_contrast, color='red')
         title = 'Contrast measures of the images'
-        plt.title(title)
+        ax.set_gtitle(title)
         plt.show()
     
     return sample_contrasting
 
 
-def get_symmetric_imgs(img_list, folder = '', cut_offs={'mse': 0.05, 'ssim':0.95}, plot_symmetry_measures=True):
+def get_symmetric_imgs(img_list, folder = '', cut_off_mse=0.05, cut_off_ssim=0.95, plot_symmetry_measures=True):
     """
     Returns list of files that are symmetric using normalized mse and structual similarity from skimage
     
@@ -86,57 +89,77 @@ def get_symmetric_imgs(img_list, folder = '', cut_offs={'mse': 0.05, 'ssim':0.95
     :param folder: path to images
     :param cut_offs: minimum symmetry measure by metric as defined in image_metrics.py
     :param plot_symmetry_measures: if True, plots symmetry measures
-    :return: list of symmetric enough files + list of images consisting of multiple symmetric tiles
+    :return: list of symmetric enough files
     """
 
     symmetry_measure = [None] * len(img_list)
-    symmetry_pieces = [None] * len(img_list)
     
     sample_symmetric = []
-    sample_multitile = []
-    
-    cut_off_mse = cut_offs['mse']
-    cut_off_ssim=cut_offs['ssim']
     
     for i, img_file in enumerate(img_list):
         img = cv2.imread('{}/{}'.format(folder, img_file))[...,::-1]
     
         symmetry_measure[i] = image_metrics.get_tile_symmetry(Tile(_prepare_img(img)))
-        symmetry_pieces[i] = image_metrics.get_tile_symmetry_by_piece(Tile(_prepare_img(img, new_size=(512, 512))))
 
         if (symmetry_measure[i]['ssim'] >= cut_off_ssim) or \
             (symmetry_measure[i]['normalized_root_mse'] <= cut_off_mse):
             sample_symmetric.append(img_file)
-        if (symmetry_pieces[i]['ssim'] >= cut_off_ssim) or \
-            (symmetry_pieces[i]['normalized_root_mse'] <= cut_off_mse):
-            sample_multitile.append(img_file)
 
     if plot_symmetry_measures:
         fig, ax = plt.subplots(1, 2, figsize=(12, 4))
-        ax[0].plot(sorted([_['normalized_root_mse'] for _ in symmetry_measure]));
+        ax[0].plot(sorted([_['normalized_root_mse'] for _ in symmetry_measure]))
         ax[0].axhline(cut_off_mse, color='red')
         title = 'Symmetry measures of the images (mse)'
         ax[0].set_title(title)
         
-        ax[1].plot(sorted([_['ssim'] for _ in symmetry_measure]));
+        ax[1].plot(sorted([_['ssim'] for _ in symmetry_measure]))
         ax[1].axhline(cut_off_ssim, color='red')
         title = 'Symmetry measures of the images (ssim)'
         ax[1].set_title(title)
         plt.show()
-        
+    
+    return sample_symmetric
+
+
+def get_multitile_imgs(img_list, folder='', cut_off_mse=0.05, cut_off_ssim=0.95, plot_symmetry_measures=True):
+    """
+    Returns list of files that are likely to consist of multiple symmetric images
+    using normalized mse and structual similarity from skimage
+
+    :param img_list: list of image names
+    :param folder: path to images
+    :param cut_offs: minimum symmetry measure by metric as defined in image_metrics.py
+    :param plot_symmetry_measures: if True, plots symmetry measures
+    :return: list of images consisting of multiple symmetric tiles
+    """
+
+    symmetry_pieces = [None] * len(img_list)
+
+    sample_multitile = []
+
+    for i, img_file in enumerate(img_list):
+        img = cv2.imread('{}/{}'.format(folder, img_file))[..., ::-1]
+
+        symmetry_pieces[i] = image_metrics.get_tile_symmetry_by_piece(Tile(_prepare_img(img, new_size=(512, 512))))
+
+        if (symmetry_pieces[i]['ssim'] >= cut_off_ssim) or \
+                (symmetry_pieces[i]['normalized_root_mse'] <= cut_off_mse):
+            sample_multitile.append(img_file)
+
+    if plot_symmetry_measures:
         fig, ax = plt.subplots(1, 2, figsize=(12, 4))
-        ax[0].plot(sorted([_['normalized_root_mse'] for _ in symmetry_pieces]));
+        ax[0].plot(sorted([_['normalized_root_mse'] for _ in symmetry_pieces]))
         ax[0].axhline(cut_off_mse, color='red')
         title = 'Symmetry measures of the images by pieces (mse)'
         ax[0].set_title(title)
 
-        ax[1].plot(sorted([_['ssim'] for _ in symmetry_pieces]));
+        ax[1].plot(sorted([_['ssim'] for _ in symmetry_pieces]))
         ax[1].axhline(cut_off_ssim, color='red')
         title = 'Symmetry measures of the images by pieces (ssim)'
         ax[1].set_title(title)
         plt.show()
-    
-    return sample_symmetric, sample_multitile
+
+    return sample_multitile
 
 
 def _prepare_img(img, new_size=(128, 128), blurring_kernel=(3, 3)):
