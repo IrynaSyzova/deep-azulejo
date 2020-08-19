@@ -9,7 +9,7 @@ import warnings
 from src.Tile import Tile
 
 
-def contrast_measure(img):
+def _contrast_measure(img):
     """
     Defines normalised contrast of the image
     :param img: colour image
@@ -32,14 +32,15 @@ def get_tile_contrast(tile, n_pieces=25):
     return min([contrast_measure(_.img) for _ in tile_list])
 
 
-def _tile_symmetry_helper(tile, metric='ssim'):
+def get_tile_symmetry(tile, metric='structural_similarity'):
     """
     Check tile's symmetry horizontally, vertically, and diagonally
     :param tile: object of class Tile
-    :param metric: metric to check; current possible values are `ssim` (for structural similarity) or `normalized_root_mse`
+    :param metric: metric to check; 
+        current possible values are `structural_similarity` or `normalized_root_mse`
     :return: measure of tiles to check contrast in
     """
-    if metric not in ('ssim', 'normalized_root_mse'):
+    if metric not in ('structural_similarity', 'normalized_root_mse'):
         warnings.warn('{} is not currently supported'.format(metric))
         return None
     
@@ -53,43 +54,29 @@ def _tile_symmetry_helper(tile, metric='ssim'):
     symmetry_measure_list = []
     for i in range(len(tile_compare)):
         tile0, tile1 = tile_compare[i]
-        if metric == 'ssim':
+        if metric == 'structural_similarity':
             symmetry_measure = ssim(tile0.img, tile1.img, multichannel=True)
         elif metric == 'normalized_root_mse':
             symmetry_measure = normalized_root_mse(tile0.img, tile1.img)
         else:
-
+            warnings.warn('{} is not currently supported'.format(metric))
             return None
         symmetry_measure_list.append(symmetry_measure)
 
-    if metric == 'ssim':
+    if metric == 'structural_similarity':
         return np.max(symmetry_measure_list)
     if metric == 'normalized_root_mse':
         return np.min(symmetry_measure_list)
 
-    
-def get_tile_symmetry(tile):
-    """
-    Calculates file's symmetry using both structural similarity and normalised mse.
-    :param tile: object of class Tile
-    :return: dictionary with both symmetry measures
-    """
-    symmetry_measure = {}
-    
-    symmetry_measure['ssim'] = _tile_symmetry_helper(tile, metric='ssim')
-    symmetry_measure['normalized_root_mse'] = _tile_symmetry_helper(tile, metric='normalized_root_mse')
-    
-    return symmetry_measure
 
-
-def get_tile_symmetry_by_pieces(tile, pieces=(4, 9, 16, 25, 36, 49, 64)):
+def get_tile_symmetry_by_pieces(tile, pieces=(4, 9, 16, 25, 36, 49, 64), metric='structural_similarity'):
     """
     Checks tile symmetry
     :param tile: object of class Tile
     :param pieces: list of numbers of pieces to symmetry in
     :return: best symmetry obtained
     """
-    symmetry_pieces = {'ssim': [], 'normalized_root_mse': []}
+    symmetry_pieces = []
     for n in pieces:
         if ((n) ** 0.5) ** 2 != n:
             warnings.warn('{} should be a square number.'.format(n))
@@ -97,11 +84,23 @@ def get_tile_symmetry_by_pieces(tile, pieces=(4, 9, 16, 25, 36, 49, 64)):
 
         tile_list = tile.get_pieces(n)
         
-        symmetry_by_piece = np.min([_tile_symmetry_helper(tile_piece, metric='ssim') for tile_piece in tile_list])
-        symmetry_pieces['ssim'].append(symmetry_by_piece)
-            
-        symmetry_by_piece = np.max([_tile_symmetry_helper(tile_piece, metric='normalized_root_mse') for tile_piece in tile_list])
-        symmetry_pieces['normalized_root_mse'].append(symmetry_by_piece)
-        
-    return {'ssim': max(symmetry_pieces['ssim']), 'normalized_root_mse': min(symmetry_pieces['normalized_root_mse']) }
+        if metric == 'structural_similarity':
+            symmetry_by_piece = np.min([
+                get_tile_symmetry(tile_piece, metric='structural_similarity')
+                for tile_piece 
+                in tile_list
+            ])
+            symmetry_pieces.append(symmetry_by_piece)
+        elif metric = 'normalized_root_mse':
+            symmetry_by_piece = np.max([
+                get_tile_symmetry(tile_piece, metric='normalized_root_mse') 
+                for tile_piece 
+                in tile_list
+            ])
+            symmetry_pieces.append(symmetry_by_piece)
+    
+    if 'structural_similarity':
+        return max(symmetry_pieces)
+    if 'normalized_root_mse': 
+        return min(symmetry_pieces)
     
