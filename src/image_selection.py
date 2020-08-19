@@ -27,7 +27,7 @@ def get_square_imgs(img_list, folder = '', tolerance=0.1, plot_aspect_ratios=Tru
     sample_rectangular = []
     sample_square = []
 
-    for img_file in img_list:
+    for i, img_file in enumerate(img_list):
         img = cv2.imread('{}/{}'.format(folder, img_file))[...,::-1]
         aspect_ratios[i] = max(
             img.shape[0]*1.0 / img.shape[1],
@@ -35,14 +35,8 @@ def get_square_imgs(img_list, folder = '', tolerance=0.1, plot_aspect_ratios=Tru
         )
         
         if aspect_ratios[i] >= 1+tolerance:
-            sample_rectangular.append(img_file)
-            
-        else:
             sample_square.append(img_file)
-        i += 1
 
-    if i < len(aspect_ratios):
-        aspect_ratios = aspect_ratios[:i]
     if plot_aspect_ratios:
         plt.plot(sorted(aspect_ratios));
         plt.gca().axhline(1 + tolerance, color='red')
