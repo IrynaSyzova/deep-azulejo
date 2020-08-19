@@ -49,12 +49,12 @@ def get_square_imgs(img_list, folder = '', tolerance=0.1, plot_aspect_ratios=Tru
 
 def get_contrast_imgs(img_list, folder = '', min_contrast=0.25, n_pieces=25, plot_contrasts=True):
     """
-    Returns list of files that are square or almost square
+    Returns list of files that are high contrast
     
     :param img_list: list of image names 
     :param folder: path to images
     :param min_contrast:minimum possible contast measure as defined in image_metrics.py
-    :param plot_aspect_ratios: if True, plots aspect ratios
+    :param plot_contrasts: if True, plots aspect ratios
     :return: list of contasting enough files
     """
     contrast_measure_list = [0] * len(img_list)
@@ -80,7 +80,7 @@ def get_contrast_imgs(img_list, folder = '', min_contrast=0.25, n_pieces=25, plo
 
 def get_symmetric_imgs(img_list, folder = '', cut_offs={'mse': 0.05, 'ssim':0.95}, plot_symmetry_measures=True):
     """
-    Returns list of files that are square or almost square
+    Returns list of files that are symmetric using normalized mse and structual similarity from skimage
     
     :param img_list: list of image names 
     :param folder: path to images
