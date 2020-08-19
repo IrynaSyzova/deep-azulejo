@@ -38,7 +38,7 @@ def get_tile_symmetry(tile, metric='structural_similarity'):
     :param tile: object of class Tile
     :param metric: metric to check; 
         current possible values are `structural_similarity` or `normalized_root_mse`
-    :return: measure of tiles to check contrast in
+    :return: measure of tile's symmetry
     """
     if metric not in ('structural_similarity', 'normalized_root_mse'):
         warnings.warn('{} is not currently supported'.format(metric))
