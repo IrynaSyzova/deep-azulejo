@@ -153,7 +153,7 @@ def get_multitile_imgs(img_list, folder='', cut_off_mse=0.05, cut_off_ssim=0.95,
     for i, img_file in enumerate(img_list):
         img = cv2.imread('{}/{}'.format(folder, img_file))[..., ::-1]
 
-        symmetry_pieces[i] = tile_metrics.get_tile_symmetry_by_piece(Tile(_prepare_img(img, new_size=(512, 512))))
+        symmetry_pieces[i] = tile_metrics.get_tile_symmetry_by_pieces(Tile(_prepare_img(img, new_size=(512, 512))))
 
         if (symmetry_pieces[i]['ssim'] >= cut_off_ssim) or \
                 (symmetry_pieces[i]['normalized_root_mse'] <= cut_off_mse):
