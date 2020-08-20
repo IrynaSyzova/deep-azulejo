@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import math
 import warnings
 
+from src import utils
 
 class Tile:
     """
@@ -15,8 +16,8 @@ class Tile:
     """
 
     def __init__(self, img):
-        new_shape = min(img.shape[0], img.shape[1])
-        img = img[0:new_shape, 0:new_shape, ...]
+        if img.shape[0] != img.shape[1]:
+            raise ValueError('Image must be square to be a tile (image shape is {}x{}).'.format(*img.shape))
         self.img = img
         self.dims = img.shape
 
@@ -51,50 +52,8 @@ class Tile:
         :param rows: grid dimension: rows
         :param cols: grip dimension: cols
         """
-        if (rows is None) or (rows == 0) or (rows > len(tile_list)):
-            if (cols is None) or (cols == 0):
-                rows = int(math.ceil(len(tile_list) ** 0.5))
-                cols = int(math.ceil(len(tile_list) / rows))
-            else:
-                rows = int(math.ceil(len(tile_list) / cols))
-        elif (cols is None) or (cols == 0) or (rows > len(tile_list)):
-            cols = int(math.ceil(len(tile_list) / rows))
-
-        if (rows == 0) or (cols == 0):
-            print('Nothing to plot')
-            return
-
-        if rows * cols >= len(tile_list):
-            tile_list_plot = np.array(tile_list + [np.nan] * (rows * cols - len(tile_list))).reshape(rows, cols)
-
-        else:
-            tile_list_plot = np.random.choice(tile_list, size=(rows, cols), replace=False)
-
-        fig, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
-        # 16 is the right width for my screen
-        # height is calculated to keep same distance horizontally and vertically between plotted tiles
-
-        # if rows ==1 or cols == 1 then plr.subplots(rows, cols) will create a vector of axis
-        # otherwise subplots(roxws, cols) will create a matrix of axis
-        if rows == 1:
-            for col in range(cols):
-                ax[col].imshow(tile_list[col].img)
-                ax[col].axis('off')
-        elif cols == 1:
-            for row in range(rows):
-                ax[row].imshow(tile_list[row].img)
-                ax[row].axis('off')
-        else:
-            for row in range(rows):
-                for col in range(cols):
-                    if tile_list_plot[row][col] is not np.nan:
-                        ax[row, col].imshow(tile_list_plot[row][col].img)
-                        ax[row, col].axis('off')
-                    else:
-                        ax[row, col].axis('off')
-
-        plt.show()
-
+        src.plot_imgs([tile.img for tile in tile_list], rows=rows, cols=cols)
+        
     # Flipping
     def flip_vertical(self):
         return Tile(cv2.flip(self.img, 0))

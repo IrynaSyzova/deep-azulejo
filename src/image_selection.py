@@ -34,16 +34,16 @@ def get_square_imgs(img_list, folder = '', tolerance=0.1, plot_aspect_ratios=Tru
             img.shape[1]*1.0 / img.shape[0]
         )
         
-        if aspect_ratios[i] >= 1+tolerance:
+        if aspect_ratios[i] <= 1+tolerance:
             sample_square.append(img_file)
 
     if plot_aspect_ratios:
-        fig, ax = plt.subplots(1, 2, figsize=(12, 4))
+        plt.figure(figsize=(6, 4))
 
-        ax.plot(sorted(aspect_ratios))
-        ax.axhline(1 + tolerance, color='red')
+        plt.plot(sorted(aspect_ratios))
+        plt.axhline(1 + tolerance, color='red')
         title = 'Aspect ratios of the images'
-        ax.set_title(title)
+        plt.title(title)
         plt.show()
         
     return sample_square

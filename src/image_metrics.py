@@ -8,6 +8,12 @@ from skimage.metrics import structural_similarity as ssim, normalized_root_mse
 from src.Tile import Tile
 
 
+def aspect_ratio(img):
+    return min(
+        img.shape[0]*1.0 / img.shape[1],
+        img.shape[1]*1.0 / img.shape[0]
+    )
+
 def contrast_measure(img):
     return np.median([img[:, :, i].max() - img[:, :, i].min() for i in [0, 1, 2]])/255.0
 
