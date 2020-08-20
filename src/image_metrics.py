@@ -3,46 +3,52 @@ Self-defined functions to measure images according to different properties.
 """
 import cv2
 import numpy as np
-from skimage.metrics import structural_similarity as ssim, normalized_root_mse
 import warnings
 
 from src.Tile import Tile
+from src.utils import _prepare_img
 
 
-def contrast_measure(img):
+def contrast_measure(tile, agg_by_channel=np.median):
     """
     Defines normalised contrast of the image
     :param img: colour image
+    :param agg: aggregation by channel
     :return: contrast measure from [0, 1]
     """
-    return np.median([img[:, :, i].max() - img[:, :, i].min() for i in [0, 1, 2]])/255.0
+    return agg_by_channel([
+        tile.img[:, :, i].max() - tile.img[:, :, i].min()
+        for i in [0, 1, 2]
+    ])/255.0
 
 
-def get_tile_contrast(tile, n_pieces=25):
+def get_tile_contrast_by_multitile(tile, n_pieces=25, agg_by_channel=np.median, agg_subtiles=min):
     """
-    Given object of class Tile return minimum contrast of object's image cropped into n_pieces parts
+    Given object of class Tile return minimum contrast of object's image
+        cropped into n_pieces parts
     :param tile: object of class Tile
     :param n_pieces: number of pieces to check contrast in
+    :param agg_by_channel: how to aggregate contrast by 3 color channels
+    :param agg_subtiles: how to aggregate contrast in subtiles
     :return: contrast measure from [0, 1]
     """
 
     if ((n_pieces)**0.5)**2 != n_pieces:
         warnings.warn('{} should be a square number.'.format(n_pieces))
     tile_list = tile.get_pieces(n_pieces)
-    return min([contrast_measure(_.img) for _ in tile_list])
+    return agg_subtiles([contrast_measure(_.img, agg_by_channel) for _ in tile_list])
 
 
-def _tile_symmetry_helper(tile, metric='ssim'):
+def get_tile_symmetry(tile, metric, agg, *args, **kwargs):
     """
-    Check tile's symmetry horizontally, vertically, and diagonally
+    Check tile's symmetry horizontally, vertically, and diagonally; returns best of possible
     :param tile: object of class Tile
-    :param metric: metric to check; current possible values are `ssim` (for structural similarity) or `normalized_root_mse`
-    :return: measure of tiles to check contrast in
+    :param metric: metric to apply
+    :param agg: method of aggregation, for example, min, max, np.median
+    :param args: additional arguments for metric
+    :param kwargs: additional keyword arguments for metric
+    :return: symmetric measure of tile
     """
-    if metric not in ('ssim', 'normalized_root_mse'):
-        warnings.warn('{} is not currently supported'.format(metric))
-        return None
-    
     tile_compare = [
         [tile, tile.flip_horizontal()],
         [tile, tile.flip_vertical()],
@@ -53,55 +59,38 @@ def _tile_symmetry_helper(tile, metric='ssim'):
     symmetry_measure_list = []
     for i in range(len(tile_compare)):
         tile0, tile1 = tile_compare[i]
-        if metric == 'ssim':
-            symmetry_measure = ssim(tile0.img, tile1.img, multichannel=True)
-        elif metric == 'normalized_root_mse':
-            symmetry_measure = normalized_root_mse(tile0.img, tile1.img)
-        else:
-
-            return None
+        symmetry_measure = metric(tile0.img, tile1.img, *args, **kwargs)
         symmetry_measure_list.append(symmetry_measure)
 
-    if metric == 'ssim':
-        return np.max(symmetry_measure_list)
-    if metric == 'normalized_root_mse':
-        return np.min(symmetry_measure_list)
+    return agg(symmetry_measure_list)
 
-    
-def get_tile_symmetry(tile):
+
+def get_symmetry_by_multitile(tile, n_pieces, agg_pieces, metric, agg_metric, *args, **kwargs):
     """
-    Calculates file's symmetry using both structural similarity and normalised mse.
+    Checks tile symmetry separately for each of n_pieces sub-tiles
     :param tile: object of class Tile
-    :return: dictionary with both symmetry measures
+    :param n_pieces: number of pieces to chop tile into
+    :param agg_pieces: how to aggregate symmetry measures of sub-tiles
+    :param metric: symmetry metric
+    :param agg_metric: method of aggregation
+    :param args: additional arguments for metric
+    :param kwargs: additional keyword arguments for metric
+    :return: symmetric measure of tile
     """
-    symmetry_measure = {}
-    
-    symmetry_measure['ssim'] = _tile_symmetry_helper(tile, metric='ssim')
-    symmetry_measure['normalized_root_mse'] = _tile_symmetry_helper(tile, metric='normalized_root_mse')
-    
-    return symmetry_measure
+    if ((n_pieces) ** 0.5) ** 2 != n_pieces:
+        warnings.warn('{} should be a square number.'.format(n_pieces))
+        return None
+    tile_list = tile.get_pieces(n_pieces)
+    return agg_pieces([get_tile_symmetry(tile_piece, metric, agg_metric, *args, **kwargs) for tile_piece in tile_list])
 
 
-def get_tile_symmetry_by_pieces(tile, pieces=(4, 9, 16, 25, 36, 49, 64)):
-    """
-    Checks tile symmetry
-    :param tile: object of class Tile
-    :param pieces: list of numbers of pieces to symmetry in
-    :return: best symmetry obtained
-    """
-    symmetry_pieces = {'ssim': [], 'normalized_root_mse': []}
-    for n in pieces:
-        if ((n) ** 0.5) ** 2 != n:
-            warnings.warn('{} should be a square number.'.format(n))
-            continue
 
-        tile_list = tile.get_pieces(n)
-        
-        symmetry_by_piece = np.min([_tile_symmetry_helper(tile_piece, metric='ssim') for tile_piece in tile_list])
-        symmetry_pieces['ssim'].append(symmetry_by_piece)
-            
-        symmetry_by_piece = np.max([_tile_symmetry_helper(tile_piece, metric='normalized_root_mse') for tile_piece in tile_list])
-        symmetry_pieces['normalized_root_mse'].append(symmetry_by_piece)
-        
-    return {'ssim': max(symmetry_pieces['ssim']), 'normalized_root_mse': min(symmetry_pieces['normalized_root_mse']) }
-    
+def get_multitileness(tile, pieces_to_check, agg_final, agg_pieces, metric, agg_metric, *args, **kwargs):
+    """
+    TODO
+    """
+    symmetry_pieces = []
+    for n in pieces_to_check:
+        symmetry_pieces.append(get_symmetry_by_multitile(tile, n, agg_pieces, metric, agg_metric, *args, **kwargs))
+
+    return agg_final(symmetry_pieces)
