@@ -106,7 +106,7 @@ class Tile:
         shape = self.img.shape
         
         if per_dim**2 != n:
-            warnings.Warning('{n} should be a square number. Proceeding with {per_dim}x{per_dim}'.format(
+            warnings.warn('{n} should be a square number. Proceeding with {per_dim}x{per_dim}'.format(
                 n=n, per_dim=per_dim
             ))
             

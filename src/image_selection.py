@@ -6,8 +6,21 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-from src import image_metrics
+from src import tile_metrics
 from src.Tile import Tile
+import warnings
+
+
+def select_imgs(img_list, folder, func, **kwargs):
+    """
+
+    :param img_list:
+    :param folder:
+    :param func:
+    :param kwargs:
+    :return:
+    """
+    pass
 
 
 def get_square_imgs(img_list, folder = '', tolerance=0.1, plot_aspect_ratios=True):
@@ -55,7 +68,7 @@ def get_contrast_imgs(img_list, folder = '', min_contrast=0.25, n_pieces=25, plo
     
     :param img_list: list of image names 
     :param folder: path to images
-    :param min_contrast:minimum possible contast measure as defined in image_metrics.py
+    :param min_contrast:minimum possible contast measure as defined in tile_metrics.py
     :param plot_contrasts: if True, plots aspect ratios
     :return: list of contasting enough files
     """
@@ -66,7 +79,7 @@ def get_contrast_imgs(img_list, folder = '', min_contrast=0.25, n_pieces=25, plo
         img = cv2.imread('{}/{}'.format(folder, img_file))[...,::-1]
         img = _prepare_img(img)
 
-        contrast_measure_list[i] =  image_metrics.get_tile_contrast(Tile(img), n_pieces=25)
+        contrast_measure_list[i] =  tile_metrics.get_tile_contrast(Tile(img), n_pieces=25)
         if contrast_measure_list[i] > min_contrast:
             sample_contrasting.append(img_file)
 
@@ -81,13 +94,13 @@ def get_contrast_imgs(img_list, folder = '', min_contrast=0.25, n_pieces=25, plo
     return sample_contrasting
 
 
-def get_symmetric_imgs(img_list, folder = '', cut_off_mse=0.05, cut_off_ssim=0.95, plot_symmetry_measures=True):
+def get_symmetric_imgs(img_list, folder = '', cut_off_mse=0.05, plot_symmetry_measures=True):
     """
     Returns list of files that are symmetric using normalized mse and structual similarity from skimage
     
     :param img_list: list of image names 
     :param folder: path to images
-    :param cut_offs: minimum symmetry measure by metric as defined in image_metrics.py
+    :param cut_offs: minimum symmetry measure by metric as defined in tile_metrics.py
     :param plot_symmetry_measures: if True, plots symmetry measures
     :return: list of symmetric enough files
     """
@@ -99,7 +112,7 @@ def get_symmetric_imgs(img_list, folder = '', cut_off_mse=0.05, cut_off_ssim=0.9
     for i, img_file in enumerate(img_list):
         img = cv2.imread('{}/{}'.format(folder, img_file))[...,::-1]
     
-        symmetry_measure[i] = image_metrics.get_tile_symmetry(Tile(_prepare_img(img)))
+        symmetry_measure[i] = tile_metrics.get_tile_symmetry(Tile(_prepare_img(img)))
 
         if (symmetry_measure[i]['ssim'] >= cut_off_ssim) or \
             (symmetry_measure[i]['normalized_root_mse'] <= cut_off_mse):
@@ -128,7 +141,7 @@ def get_multitile_imgs(img_list, folder='', cut_off_mse=0.05, cut_off_ssim=0.95,
 
     :param img_list: list of image names
     :param folder: path to images
-    :param cut_offs: minimum symmetry measure by metric as defined in image_metrics.py
+    :param cut_offs: minimum symmetry measure by metric as defined in tile_metrics.py
     :param plot_symmetry_measures: if True, plots symmetry measures
     :return: list of images consisting of multiple symmetric tiles
     """
@@ -140,7 +153,7 @@ def get_multitile_imgs(img_list, folder='', cut_off_mse=0.05, cut_off_ssim=0.95,
     for i, img_file in enumerate(img_list):
         img = cv2.imread('{}/{}'.format(folder, img_file))[..., ::-1]
 
-        symmetry_pieces[i] = image_metrics.get_tile_symmetry_by_piece(Tile(_prepare_img(img, new_size=(512, 512))))
+        symmetry_pieces[i] = tile_metrics.get_tile_symmetry_by_pieces(Tile(_prepare_img(img, new_size=(512, 512))))
 
         if (symmetry_pieces[i]['ssim'] >= cut_off_ssim) or \
                 (symmetry_pieces[i]['normalized_root_mse'] <= cut_off_mse):
