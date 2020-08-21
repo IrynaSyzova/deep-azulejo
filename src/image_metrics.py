@@ -8,19 +8,27 @@ from skimage.metrics import structural_similarity as ssim, normalized_root_mse
 from src.Tile import Tile
 
 
-def aspect_ratio(img):
+def image_aspect_ratio(img):
     return min(
         img.shape[0]*1.0 / img.shape[1],
         img.shape[1]*1.0 / img.shape[0]
     )
 
-def contrast_measure(img):
-    return np.median([img[:, :, i].max() - img[:, :, i].min() for i in [0, 1, 2]])/255.0
 
-
-def get_tile_contrast(tile, n_pieces=25):
+def tile_uniform_contrast(tile, n_pieces=16):
+    max_intensity = [tile.img[:, :, k].max() for k in (0, 1, 2)]
+    min_intensity = [tile.img[:, :, k].min() for k in (0, 1, 2)]
+    
     tile_list = tile.get_pieces(n_pieces)
-    return min([contrast_measure(_.img) for _ in tile_list])
+    
+    return np.mean([
+        np.median([
+            (tile_piece.img[:, :, k].max() - tile_piece.img[:, :, k].min())*1.0 /
+            (max_intensity[k] - min_intensity[k]) for k in (0, 1, 2)
+        ])
+        for tile_piece 
+        in tile_list
+    ])
 
 
 def _tile_symmetry_helper(tile, metric='ssim'):
@@ -50,7 +58,7 @@ def _tile_symmetry_helper(tile, metric='ssim'):
         return np.min(symmetry_measure_list)
 
     
-def get_tile_symmetry(tile):
+def tile_symmetry(tile):
     symmetry_measure = {}
     
     symmetry_measure['ssim'] = _tile_symmetry_helper(tile, metric='ssim')

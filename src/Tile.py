@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import math
 import warnings
 
-from src import utils
+from src import io_utils
 
 class Tile:
     """
@@ -52,7 +52,7 @@ class Tile:
         :param rows: grid dimension: rows
         :param cols: grip dimension: cols
         """
-        src.plot_imgs([tile.img for tile in tile_list], rows=rows, cols=cols)
+        io_utils.plot_imgs([tile.img for tile in tile_list], rows=rows, cols=cols)
         
     # Flipping
     def flip_vertical(self):
@@ -109,8 +109,6 @@ class Tile:
             warnings.warn('{n} should be a square number. Proceeding with {per_dim}x{per_dim}'.format(
                 n=n, per_dim=per_dim
             ))
-            
-        img = cv2.resize(self.img, (per_dim**2*shape[0], per_dim**2*shape[1]))
         
         tile_list = []
         
