@@ -14,7 +14,7 @@ def plot_sample_files(file_list, folder='', plot_sample=12, cols=6):
         folder=folder
     )
     
-    plot_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols)
+    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols)
 
 
 def read_imgs(file_list, folder=''):
@@ -25,28 +25,28 @@ def read_imgs(file_list, folder=''):
     ]
     
 
-def plot_imgs(img_list, cols=6, rows=None, plot_sample=None):
+def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
     
     if plot_sample is None:
         plot_sample = len(img_list)
        
-    if (rows is None) or (rows == 0) or (rows > len(img_list)):
+    if (rows is None) or (rows == 0) or (rows > plot_sample):
         if (cols is None) or (cols == 0):
-            rows = int(math.ceil(len(img_list) ** 0.5))
-            cols = int(math.ceil(len(img_list) / rows))
+            rows = int(math.ceil(plot_sample ** 0.5))
+            cols = int(math.ceil(plot_sample / rows))
         else:
-            rows = int(math.ceil(len(img_list) / cols))
-    elif (cols is None) or (cols == 0) or (rows > len(img_list)):
-        cols = int(math.ceil(len(img_list) / rows))
+            rows = int(math.ceil(plot_sample / cols))
+    elif (cols is None) or (cols == 0) or (rows > plot_sample):
+        cols = int(math.ceil(plot_sample / rows))
 
     if (rows == 0) or (cols == 0):
         print('Nothing to plot')
         return
 
     if rows * cols >= len(img_list):
-        img_list_plot = np.array(img_list + [np.nan] * (rows * cols - len(img_list))).reshape(rows, cols)
+        idx_plot = np.array(list(range(len(img_list))) + [None] * (rows * cols - len(img_list))).reshape(rows, cols)
     else:
-        img_list_plot = np.random.choice(img_list, size=(rows, cols), replace=False)
+        idx_plot = np.random.choice(range(len(img_list)), size=(rows, cols), replace=False)
 
     fig, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
     # 16 is the right width for my screen
@@ -67,8 +67,8 @@ def plot_imgs(img_list, cols=6, rows=None, plot_sample=None):
     else:
         for col in range(cols):
             for row in range(rows):
-                if img_list_plot[row][col] is not np.nan:
-                    ax[row, col].imshow(img_list_plot[row][col])
+                if idx_plot[row][col] is not None:
+                    ax[row, col].imshow(img_list[idx_plot[row][col]])
                 else:
                     pylab.text(0.5, 0.5,'no image',
                          horizontalalignment='center',

@@ -4,6 +4,7 @@ Self-defined functions to measure images according to different properties.
 import cv2
 import numpy as np
 
+from src import image_utils
 from src.Tile import Tile
 
 
@@ -14,7 +15,7 @@ def image_aspect_ratio(img):
     )
 
 
-def tile_uniform_contrast(tile, n_pieces=36):
+def tile_uniform_contrast(tile, n_pieces=64):
     channels = (0, 1, 2)
     
     intensity = [tile.img[:, :, k].max() - tile.img[:, :, k].min() for k in channels]
@@ -22,7 +23,7 @@ def tile_uniform_contrast(tile, n_pieces=36):
     tile_list = tile.get_pieces(n_pieces)
     
     return max([
-        np.mean([
+        min([
             (tile_piece.img[:, :, k].max() - \
              tile_piece.img[:, :, k].min()) * 1.0 / intensity[k] 
             for tile_piece 
@@ -33,15 +34,22 @@ def tile_uniform_contrast(tile, n_pieces=36):
 
 
 def tile_symmetry(tile, metric, agg, **kwargs):
-    if metric not in ('ssim', 'normalized_root_mse'):
-        print('{} is not currently supported'.format(metric))
-        return
+    tile_center = Tile(image_utils.resize(tile.get_square_from_center(0.33).img, tile.img.shape[:-1]))
     
     tile_compare = [
-        [tile, tile.flip_horizontal()],
-        [tile, tile.flip_vertical()],
-        [tile, tile.flip_transpose()],
-        [tile, tile.rotate(clockwise=False).flip_transpose().rotate(clockwise=True)]
+        [
+            tile, 
+            tile.flip_transpose()
+        ], [
+            tile, 
+            tile.rotate(clockwise=False).flip_transpose().rotate(clockwise=True)
+        ], [
+            tile_center, 
+            tile_center.flip_transpose()
+        ], [
+            tile_center,
+            tile_center.rotate(clockwise=False).flip_transpose().rotate(clockwise=True)
+        ]
     ]
 
     symmetry_measure_list = []
