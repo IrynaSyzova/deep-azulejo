@@ -24,38 +24,36 @@ def read_imgs(file_list, folder=''):
         file_list
     ]
     
-    
+
 def plot_imgs(img_list, cols=6, rows=None, plot_sample=None):
     
     if plot_sample is None:
         plot_sample = len(img_list)
-    
-    if (rows is None) or (rows == 0) or (rows > plot_sample):
+       
+    if (rows is None) or (rows == 0) or (rows > len(img_list)):
         if (cols is None) or (cols == 0):
-            rows = int(math.ceil(plot_sample ** 0.5))
-            cols = int(math.ceil(plot_sample / rows))
+            rows = int(math.ceil(len(img_list) ** 0.5))
+            cols = int(math.ceil(len(img_list) / rows))
         else:
-            rows = int(math.ceil(plot_sample / cols))
-    elif (cols is None) or (cols == 0) or (cols > plot_sample):
-        cols = int(math.ceil(plot_sample / rows))
-        
+            rows = int(math.ceil(len(img_list) / cols))
+    elif (cols is None) or (cols == 0) or (rows > len(img_list)):
+        cols = int(math.ceil(len(img_list) / rows))
+
     if (rows == 0) or (cols == 0):
         print('Nothing to plot')
         return
 
-    
+    if rows * cols >= len(img_list):
+        img_list_plot = np.array(img_list + [np.nan] * (rows * cols - len(img_list))).reshape(rows, cols)
+    else:
+        img_list_plot = np.random.choice(img_list, size=(rows, cols), replace=False)
+
     fig, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
     # 16 is the right width for my screen
     # height is calculated to keep same distance horizontally and vertically between plotted images
 
     # if rows ==1 or cols == 1 then plt.subplots(rows, cols) will create a vector of axis
     # otherwise subplots(roxws, cols) will create a matrix of axis
-    
-    if rows * cols >= len(img_list):
-        img_list_plot = np.array(img_list + [np.nan] * (rows * cols - len(img_list))).reshape(rows, cols)
-
-    else:
-        img_list_plot = np.random.choice(img_list, size=(rows, cols), replace=False)
     
     if rows == 1:
         for col in range(cols):

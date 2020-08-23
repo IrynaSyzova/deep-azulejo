@@ -15,8 +15,6 @@ def resize(img, new_size=(64, 64)):
     
 
 def increase_contrast(img):
-    
-    
     equalized = [cv2.equalizeHist(img[:, :, k]) for k in (0, 1, 2)]
 
     return np.array(

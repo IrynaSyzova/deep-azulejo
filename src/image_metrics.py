@@ -3,7 +3,6 @@ Self-defined functions to measure images according to different properties.
 """
 import cv2
 import numpy as np
-from skimage.metrics import structural_similarity as ssim, normalized_root_mse
 
 from src.Tile import Tile
 
@@ -15,23 +14,25 @@ def image_aspect_ratio(img):
     )
 
 
-def tile_uniform_contrast(tile, n_pieces=16):
-    max_intensity = [tile.img[:, :, k].max() for k in (0, 1, 2)]
-    min_intensity = [tile.img[:, :, k].min() for k in (0, 1, 2)]
+def tile_uniform_contrast(tile, n_pieces=36):
+    channels = (0, 1, 2)
     
+    intensity = [tile.img[:, :, k].max() - tile.img[:, :, k].min() for k in channels]
+
     tile_list = tile.get_pieces(n_pieces)
     
-    return np.mean([
-        np.median([
-            (tile_piece.img[:, :, k].max() - tile_piece.img[:, :, k].min())*1.0 /
-            (max_intensity[k] - min_intensity[k]) for k in (0, 1, 2)
+    return max([
+        np.mean([
+            (tile_piece.img[:, :, k].max() - \
+             tile_piece.img[:, :, k].min()) * 1.0 / intensity[k] 
+            for tile_piece 
+            in tile_list
         ])
-        for tile_piece 
-        in tile_list
+        for k in channels
     ])
 
 
-def _tile_symmetry_helper(tile, metric='ssim'):
+def tile_symmetry(tile, metric, agg, **kwargs):
     if metric not in ('ssim', 'normalized_root_mse'):
         print('{} is not currently supported'.format(metric))
         return
@@ -46,25 +47,10 @@ def _tile_symmetry_helper(tile, metric='ssim'):
     symmetry_measure_list = []
     for i in range(len(tile_compare)):
         tile0, tile1 = tile_compare[i]
-        if metric == 'ssim':
-            symmetry_measure = ssim(tile0.img, tile1.img, multichannel=True)
-        elif metric == 'normalized_root_mse':
-            symmetry_measure = normalized_root_mse(tile0.img, tile1.img)
+        symmetry_measure = metric(tile0.img, tile1.img, **kwargs)
         symmetry_measure_list.append(symmetry_measure)
 
-    if metric == 'ssim':
-        return np.max(symmetry_measure_list)
-    if metric == 'normalized_root_mse':
-        return np.min(symmetry_measure_list)
-
-    
-def tile_symmetry(tile):
-    symmetry_measure = {}
-    
-    symmetry_measure['ssim'] = _tile_symmetry_helper(tile, metric='ssim')
-    symmetry_measure['normalized_root_mse'] = _tile_symmetry_helper(tile, metric='normalized_root_mse')
-    
-    return symmetry_measure
+    return agg(symmetry_measure_list)
 
 
 def get_tile_symmetry_by_piece(tile, pieces=(4, 9, 16, 25, 36, 49, 64)):
