@@ -22,7 +22,7 @@ def tile_uniform_contrast(tile, n_pieces=64):
 
     tile_list = tile.get_pieces(n_pieces)
     
-    return max([
+    return np.mean([
         min([
             (tile_piece.img[:, :, k].max() - \
              tile_piece.img[:, :, k].min()) * 1.0 / intensity[k] 
@@ -34,7 +34,7 @@ def tile_uniform_contrast(tile, n_pieces=64):
 
 
 def tile_symmetry(tile, metric, agg, **kwargs):
-    tile_center = Tile(image_utils.resize(tile.get_square_from_center(0.33).img, tile.img.shape[:-1]))
+    tile_center = tile.get_square_from_center(0.33)
     
     tile_compare = [
         [
@@ -60,17 +60,4 @@ def tile_symmetry(tile, metric, agg, **kwargs):
 
     return agg(symmetry_measure_list)
 
-
-def get_tile_symmetry_by_piece(tile, pieces=(4, 9, 16, 25, 36, 49, 64)):
-    symmetry_pieces = {'ssim': [], 'normalized_root_mse': []}
-    for n in pieces:
-        tile_list = tile.get_pieces(n)
         
-        symmetry_by_piece = np.min([_tile_symmetry_helper(tile_piece, metric='ssim') for tile_piece in tile_list])
-        symmetry_pieces['ssim'].append(symmetry_by_piece)
-            
-        symmetry_by_piece = np.max([_tile_symmetry_helper(tile_piece, metric='normalized_root_mse') for tile_piece in tile_list])
-        symmetry_pieces['normalized_root_mse'].append(symmetry_by_piece)
-        
-    return {'ssim': max(symmetry_pieces['ssim']), 'normalized_root_mse': min(symmetry_pieces['normalized_root_mse']) }
-    

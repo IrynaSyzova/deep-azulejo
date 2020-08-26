@@ -52,7 +52,7 @@ class Tile:
         :param rows: grid dimension: rows
         :param cols: grip dimension: cols
         """
-        io_utils.plot_imgs([tile.img for tile in tile_list], rows=rows, cols=cols)
+        io_utils.plot_sample_imgs([tile.img for tile in tile_list], rows=rows, cols=cols)
         
     # Flipping
     def flip_vertical(self):
