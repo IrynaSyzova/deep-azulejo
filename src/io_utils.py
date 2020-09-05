@@ -7,7 +7,7 @@ import math
 
 def plot_sample_files(file_list, folder='', plot_sample=12, cols=6):
     if plot_sample is None:
-        plot_sample = len(img_list)
+        plot_sample = len(file_list)
         
     imgs_to_plot = read_imgs(
         np.random.choice(file_list, min(plot_sample, len(file_list)), replace=False), 
@@ -48,7 +48,7 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
     else:
         idx_plot = np.random.choice(range(len(img_list)), size=(rows, cols), replace=False)
 
-    fig, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
+    _, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
     # 16 is the right width for my screen
     # height is calculated to keep same distance horizontally and vertically between plotted images
 
