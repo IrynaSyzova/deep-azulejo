@@ -2,9 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-import warnings
 
-from src import io_utils
 
 class Tile:
     """
@@ -16,8 +14,6 @@ class Tile:
     """
 
     def __init__(self, img):
-        if img.shape[0] != img.shape[1]:
-            raise ValueError('Image must be square to be a tile (image shape is {}x{}).'.format(*img.shape))
         self.img = img
         self.dims = img.shape
 
@@ -52,7 +48,6 @@ class Tile:
         :param rows: grid dimension: rows
         :param cols: grip dimension: cols
         """
-<<<<<<< HEAD
         if (rows is None) or (rows == 0) or (rows > len(tile_list)):
             if (cols is None) or (cols == 0):
                 rows = int(math.ceil(len(tile_list) ** 0.5))
@@ -72,7 +67,7 @@ class Tile:
         else:
             tile_list_plot = np.random.choice(tile_list, size=(rows, cols), replace=False)
 
-        _, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
+        fig, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
         # 16 is the right width for my screen
         # height is calculated to keep same distance horizontally and vertically between plotted tiles
 
@@ -97,10 +92,6 @@ class Tile:
 
         plt.show()
 
-=======
-        io_utils.plot_sample_imgs([tile.img for tile in tile_list], rows=rows, cols=cols)
-        
->>>>>>> f83ec63b10b0eda1d9a4868b44694179e4aa01db
     # Flipping
     def flip_vertical(self):
         return Tile(cv2.flip(self.img, 0))
@@ -141,36 +132,7 @@ class Tile:
         col_end = col_start + self.dims[1] // 2
 
         return Tile(self.img[row_start:row_end, col_start:col_end])
-    
-    def get_pieces(self, n = 9):
-        """
-        Returns n pieces; original image is cut in sqrt(n) by row and col
 
-        :param n: number of pieces to cut
-        :return: n new tiles cut out from current tile
-        """
-        per_dim = int(n**0.5)
-        shape = self.img.shape
-        
-        if per_dim**2 != n:
-            warnings.warn('{n} should be a square number. Proceeding with {per_dim}x{per_dim}'.format(
-                n=n, per_dim=per_dim
-            ))
-        
-        tile_list = []
-        
-        for i in range(per_dim):
-            for j in range(per_dim):
-                row_start = self.dims[0] // per_dim * i
-                row_end = self.dims[0] // per_dim * (i+1)
-
-                col_start = self.dims[1] // per_dim * j
-                col_end = self.dims[1] // per_dim * (j+1)
-                
-                tile_list.append(Tile(img[row_start:row_end, col_start:col_end]))
-
-        return tile_list
-        
     def get_square_from_center(self, ratio=0.8):
         """
         Cuts sub-tile from center of itself.
@@ -221,38 +183,6 @@ class Tile:
         M = cv2.getPerspectiveTransform(src_pts, dst_pts)
         warped = cv2.warpPerspective(self.img, M, (width, height))
         return Tile(warped)
-    
-    def remove_center(self):
-        """
-        Assembles new tile by cutting tile into 9 equal pieces
-        and then assembling a new one from corners:
-        A|B|C
-        D|E|F => A|C
-        G|H|I    G|I
-        """
-        subtiles = self.get_pieces(3)
-
-        result = np.concatenate(
-            (
-                np.concatenate(
-                    (
-                        subtiles[0].img,
-                        subtiles[2].img
-                    ),
-                    axis=0
-                ),
-                np.concatenate(
-                    (
-                        subtiles[6].img,
-                        subtiles[8].img
-                    ),
-                    axis=0
-                )
-            ),
-            axis=1
-        )
-
-        return Tile(result)
 
     # Assembling
     def assemble_quadrant_unfold(self, row, col):

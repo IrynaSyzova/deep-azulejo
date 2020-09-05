@@ -1,6 +1,3 @@
-"""
-Utility functions to inflate dataset by creating new images from old ones.
-"""
 import numpy as np
 
 from collections import deque
@@ -33,10 +30,6 @@ def rearrange(tile, min_size, max_size):
             fragments.append(curr.get_rhombus())
             to_fragment.append(curr.get_rhombus())
             to_augment.append(curr.get_rhombus())
-
-            fragments.append(curr.remove_corners())
-            to_fragment.append(curr.remove_corners())
-            to_augment.append(curr.remove_corners())
 
         if curr.get_quadrant(0, 0).dims[0] >= min_size:
             for i in range(0, 2):
