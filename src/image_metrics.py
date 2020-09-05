@@ -60,5 +60,3 @@ def tile_symmetry(tile, metric, agg, **kwargs):
         symmetry_measure_list.append(symmetry_measure)
 
     return agg(symmetry_measure_list)
-
-        

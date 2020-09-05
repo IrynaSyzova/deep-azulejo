@@ -53,4 +53,3 @@ def increase_contrast(img, channels=(0, 1, 2)):
 
 def blur(img, kernel=(5, 5)):
     return cv2.GaussianBlur(img, kernel, 0)
-
