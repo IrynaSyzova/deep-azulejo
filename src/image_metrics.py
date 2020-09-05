@@ -3,12 +3,17 @@ Self-defined functions to measure images according to different properties.
 """
 import cv2
 import numpy as np
+<<<<<<< HEAD
 import warnings
+=======
+>>>>>>> f83ec63b10b0eda1d9a4868b44694179e4aa01db
 
+from src import image_utils
 from src.Tile import Tile
 from src.utils import _prepare_img
 
 
+<<<<<<< HEAD
 def contrast_measure(tile, agg_by_channel=np.median):
     """
     Defines normalised contrast of the image
@@ -32,10 +37,22 @@ def get_tile_contrast_by_multitile(tile, n_pieces=25, agg_by_channel=np.median, 
     :param agg_subtiles: how to aggregate contrast in subtiles
     :return: contrast measure from [0, 1]
     """
+=======
+def image_aspect_ratio(img):
+    return min(
+        img.shape[0]*1.0 / img.shape[1],
+        img.shape[1]*1.0 / img.shape[0]
+    )
 
-    if ((n_pieces)**0.5)**2 != n_pieces:
-        warnings.warn('{} should be a square number.'.format(n_pieces))
+
+def tile_uniform_contrast(tile, n_pieces=64):
+    channels = (0, 1, 2)
+    
+    intensity = [tile.img[:, :, k].max() - tile.img[:, :, k].min() for k in channels]
+>>>>>>> f83ec63b10b0eda1d9a4868b44694179e4aa01db
+
     tile_list = tile.get_pieces(n_pieces)
+<<<<<<< HEAD
     return agg_subtiles([contrast_measure(_.img, agg_by_channel) for _ in tile_list])
 
 
@@ -49,21 +66,52 @@ def get_tile_symmetry(tile, metric, agg, *args, **kwargs):
     :param kwargs: additional keyword arguments for metric
     :return: symmetric measure of tile
     """
+=======
+    
+    return np.mean([
+        min([
+            (tile_piece.img[:, :, k].max() - \
+             tile_piece.img[:, :, k].min()) * 1.0 / intensity[k] 
+            for tile_piece 
+            in tile_list
+        ])
+        for k in channels
+    ])
+
+
+def tile_symmetry(tile, metric, agg, **kwargs):
+    tile_center = tile.get_square_from_center(0.33)
+    
+>>>>>>> f83ec63b10b0eda1d9a4868b44694179e4aa01db
     tile_compare = [
-        [tile, tile.flip_horizontal()],
-        [tile, tile.flip_vertical()],
-        [tile, tile.flip_transpose()],
-        [tile, tile.rotate(clockwise=False).flip_transpose().rotate(clockwise=True)]
+        [
+            tile, 
+            tile.flip_transpose()
+        ], [
+            tile, 
+            tile.rotate(clockwise=False).flip_transpose().rotate(clockwise=True)
+        ], [
+            tile_center, 
+            tile_center.flip_transpose()
+        ], [
+            tile_center,
+            tile_center.rotate(clockwise=False).flip_transpose().rotate(clockwise=True)
+        ]
     ]
 
     symmetry_measure_list = []
     for i in range(len(tile_compare)):
         tile0, tile1 = tile_compare[i]
+<<<<<<< HEAD
         symmetry_measure = metric(tile0.img, tile1.img, *args, **kwargs)
+=======
+        symmetry_measure = metric(tile0.img, tile1.img, **kwargs)
+>>>>>>> f83ec63b10b0eda1d9a4868b44694179e4aa01db
         symmetry_measure_list.append(symmetry_measure)
 
     return agg(symmetry_measure_list)
 
+<<<<<<< HEAD
 
 def get_symmetry_by_multitile(tile, n_pieces, agg_pieces, metric, agg_metric, *args, **kwargs):
     """
@@ -94,3 +142,6 @@ def get_multitileness(tile, pieces_to_check, agg_final, agg_pieces, metric, agg_
         symmetry_pieces.append(get_symmetry_by_multitile(tile, n, agg_pieces, metric, agg_metric, *args, **kwargs))
 
     return agg_final(symmetry_pieces)
+=======
+        
+>>>>>>> f83ec63b10b0eda1d9a4868b44694179e4aa01db

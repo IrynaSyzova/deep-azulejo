@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import math
 import warnings
 
+from src import io_utils
 
 class Tile:
     """
@@ -15,8 +16,8 @@ class Tile:
     """
 
     def __init__(self, img):
-        new_shape = min(img.shape[0], img.shape[1])
-        img = img[0:new_shape, 0:new_shape, ...]
+        if img.shape[0] != img.shape[1]:
+            raise ValueError('Image must be square to be a tile (image shape is {}x{}).'.format(*img.shape))
         self.img = img
         self.dims = img.shape
 
@@ -51,6 +52,7 @@ class Tile:
         :param rows: grid dimension: rows
         :param cols: grip dimension: cols
         """
+<<<<<<< HEAD
         if (rows is None) or (rows == 0) or (rows > len(tile_list)):
             if (cols is None) or (cols == 0):
                 rows = int(math.ceil(len(tile_list) ** 0.5))
@@ -95,6 +97,10 @@ class Tile:
 
         plt.show()
 
+=======
+        io_utils.plot_sample_imgs([tile.img for tile in tile_list], rows=rows, cols=cols)
+        
+>>>>>>> f83ec63b10b0eda1d9a4868b44694179e4aa01db
     # Flipping
     def flip_vertical(self):
         return Tile(cv2.flip(self.img, 0))
@@ -150,8 +156,6 @@ class Tile:
             warnings.warn('{n} should be a square number. Proceeding with {per_dim}x{per_dim}'.format(
                 n=n, per_dim=per_dim
             ))
-            
-        img = cv2.resize(self.img, (per_dim**2*shape[0], per_dim**2*shape[1]))
         
         tile_list = []
         
