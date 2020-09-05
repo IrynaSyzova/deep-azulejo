@@ -1,5 +1,6 @@
-data/
 dataset/
+dataset_processed/
+dataset_augmented/
 lists/
 temp/
 *.csv
