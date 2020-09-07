@@ -97,30 +97,23 @@ class Tile:
     
     def get_pieces(self, n = 9):
         """
-        Returns n pieces; original image is cut in sqrt(n) by row and col
+        Returns n pieces; original image is cut in nxn by row and col
 
-        :param n: number of pieces to cut
-        :return: n new tiles cut out from current tile
+        :param n: number of pieces to cut by row and col
+        :return: nxn new tiles cut out from current tile
         """
-        per_dim = int(n**0.5)
-        shape = self.img.shape
-        
-        if per_dim**2 != n:
-            warnings.warn('{n} should be a square number. Proceeding with {per_dim}x{per_dim}'.format(
-                n=n, per_dim=per_dim
-            ))
         
         tile_list = []
         
-        for i in range(per_dim):
-            for j in range(per_dim):
-                row_start = self.dims[0] // per_dim * i
-                row_end = self.dims[0] // per_dim * (i+1)
+        for i in range(n):
+            for j in range(n):
+                row_start = self.dims[0] // n * i
+                row_end = self.dims[0] // n * (i+1)
 
-                col_start = self.dims[1] // per_dim * j
-                col_end = self.dims[1] // per_dim * (j+1)
+                col_start = self.dims[1] // n * j
+                col_end = self.dims[1] // n * (j+1)
                 
-                tile_list.append(Tile(img[row_start:row_end, col_start:col_end]))
+                tile_list.append(Tile(self.img[row_start:row_end, col_start:col_end]))
 
         return tile_list
         
