@@ -6,6 +6,7 @@ import warnings
 
 from src import io_utils
 
+
 class Tile:
     """
     Class for creating and manipulating a single tile.
@@ -53,18 +54,35 @@ class Tile:
         :param cols: grip dimension: cols
         """
         io_utils.plot_sample_imgs([tile.img for tile in tile_list], rows=rows, cols=cols)
-        
+
     # Flipping
     def flip_vertical(self):
+        """
+        Mirrors ftile vertically
+        :return: mirrored tile
+        """
         return Tile(cv2.flip(self.img, 0))
 
     def flip_horizontal(self):
+        """
+        Mirrors tile horizontally
+        :return: mirrored tile
+        """
         return Tile(cv2.flip(self.img, 1))
 
     def flip_transpose(self):
+        """
+        Mirrors tile diagonally
+        :return: mirrored tile
+        """
         return Tile(cv2.transpose(self.img))
 
     def rotate(self, clockwise=True):
+        """
+        Rotates tile
+        :param clockwise: direction of rotation
+        :return: rotated tile
+        """
         if clockwise:
             return self.flip_transpose().flip_horizontal()
         else:
@@ -94,29 +112,29 @@ class Tile:
         col_end = col_start + self.dims[1] // 2
 
         return Tile(self.img[row_start:row_end, col_start:col_end])
-    
-    def get_pieces(self, n = 9):
+
+    def get_pieces(self, n=9):
         """
         Returns n pieces; original image is cut in nxn by row and col
 
         :param n: number of pieces to cut by row and col
         :return: nxn new tiles cut out from current tile
         """
-        
+
         tile_list = []
-        
+
         for i in range(n):
             for j in range(n):
                 row_start = self.dims[0] // n * i
-                row_end = self.dims[0] // n * (i+1)
+                row_end = self.dims[0] // n * (i + 1)
 
                 col_start = self.dims[1] // n * j
-                col_end = self.dims[1] // n * (j+1)
-                
+                col_end = self.dims[1] // n * (j + 1)
+
                 tile_list.append(Tile(self.img[row_start:row_end, col_start:col_end]))
 
         return tile_list
-        
+
     def get_square_from_center(self, ratio=0.8):
         """
         Cuts sub-tile from center of itself.
@@ -167,7 +185,7 @@ class Tile:
         M = cv2.getPerspectiveTransform(src_pts, dst_pts)
         warped = cv2.warpPerspective(self.img, M, (width, height))
         return Tile(warped)
-    
+
     def remove_center(self):
         """
         Assembles new tile by cutting tile into 9 equal pieces
@@ -280,5 +298,3 @@ class Tile:
         img_full = np.concatenate((img_upper, img_lower), axis=0)
         return Tile(img_full)
 
-    # Checks
-    # To do: symmetry checks

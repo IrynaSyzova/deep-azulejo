@@ -6,10 +6,14 @@ import numpy as np
 
 from src import image_utils
 from src.Tile import Tile
-from src.utils import _prepare_img
 
 
 def image_aspect_ratio(img):
+    """
+    Returns aspect ratio of img as measure of squareness
+    :param img: image
+    :return: aspect ratio, with 0 being least contrast and 1 being most contrast
+    """
     return min(
         img.shape[0]*1.0 / img.shape[1],
         img.shape[1]*1.0 / img.shape[0]
@@ -17,6 +21,12 @@ def image_aspect_ratio(img):
 
 
 def tile_uniform_contrast(tile, n_pieces=64):
+    """
+    Checks contrasts in tile cut into n_pieces, returns average contrast in pieces
+    :param tile: tile to check
+    :param n_pieces: number of pieces to check individually
+    :return: contrast measure, with 0 being least contrast and 1 being most contrast
+    """
     channels = (0, 1, 2)
     
     intensity = [tile.img[:, :, k].max() - tile.img[:, :, k].min() for k in channels]
@@ -35,6 +45,16 @@ def tile_uniform_contrast(tile, n_pieces=64):
 
 
 def tile_symmetry(tile, metric, agg, **kwargs):
+    """
+    Checks symmetry of tile using provided metric and aggregation function agg.
+    I check symmetry of tile itself + it's middle third,
+    assuming that middle third is one of the most important parts of the image
+    :param tile: tile to check
+    :param metric: function of 2 images that indicates their similarity
+    :param agg: aggregation function
+    :param kwargs: args of metric function
+    :return: measure of symmetry
+    """
     tile_center = tile.get_square_from_center(0.33)
     
     tile_compare = [

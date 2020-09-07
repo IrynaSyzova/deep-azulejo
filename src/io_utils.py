@@ -6,6 +6,13 @@ import math
 
 
 def plot_sample_files(file_list, folder='', plot_sample=12, cols=6):
+    """
+    Plots sample of images read from file_list
+    :param file_list: list of files to print images from
+    :param folder: path to files, defaults to current directory
+    :param plot_sample: number of images to display
+    :param cols: number of columns to arrange images
+    """
     if plot_sample is None:
         plot_sample = len(file_list)
         
@@ -18,6 +25,12 @@ def plot_sample_files(file_list, folder='', plot_sample=12, cols=6):
 
 
 def read_imgs(file_list, folder=''):
+    """
+    Reads images from file_list
+    :param file_list: list of files to read images
+    :param folder: folder of files; defaults to current
+    :return: list of images
+    """
     return [
         cv2.imread('{}/{}'.format(folder, img_file))[...,::-1]
         for img_file in
@@ -26,7 +39,13 @@ def read_imgs(file_list, folder=''):
     
 
 def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
-    
+    """
+    Given list of images plots a sample of them
+    :param img_list: list of images
+    :param cols: number of columns to arrange images
+    :param rows: number of rows to arrange images
+    :param plot_sample: number of images to plot
+    """
     if plot_sample is None:
         plot_sample = len(img_list)
        
@@ -81,6 +100,12 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
     
 
 def plot_metric(x, cut_off):
+    """
+    Given x, which is a list of numbers, sort them, plot them, with horizontal line at cut_off.
+    This is to visualisize what gets selected and what not using cut_odd
+    :param x: list of values
+    :param cut_off: number to draw horizonal line at
+    """
     plt.plot(sorted(x), label='Sorted metric')
     plt.axhline(cut_off, color='red', label='cut_off_point')
     plt.legend()
@@ -88,6 +113,10 @@ def plot_metric(x, cut_off):
 
 
 def __remove_ax_ticks(ax):
+    """
+    Removes ticks from plot to plot images prettier
+    :param ax: ax to remove ticks from
+    """
     plt.setp(ax.get_xticklabels(), visible=False)
     plt.setp(ax.get_yticklabels(), visible=False)
     ax.tick_params(axis='both', which='both', length=0)
