@@ -20,7 +20,7 @@ def image_aspect_ratio(img):
     )
 
 
-def tile_uniform_contrast(tile, n_pieces=64):
+def tile_uniform_contrast(tile, n_pieces=8):
     """
     Checks contrasts in tile cut into n_pieces, returns average contrast in pieces
     :param tile: tile to check
