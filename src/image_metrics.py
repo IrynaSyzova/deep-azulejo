@@ -12,7 +12,7 @@ def image_aspect_ratio(img):
     """
     Returns aspect ratio of img as measure of squareness
     :param img: image
-    :return: aspect ratio, with 0 being least contrast and 1 being most contrast
+    :return: aspect ratio, with 0 being least square and 1 being most square
     """
     return min(
         img.shape[0]*1.0 / img.shape[1],
