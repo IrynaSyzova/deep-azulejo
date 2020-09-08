@@ -31,6 +31,10 @@ def rearrange(tile, min_size, max_size):
             to_fragment.append(curr.get_rhombus())
             to_augment.append(curr.get_rhombus())
 
+            fragments.append(curr.remove_center())
+            to_fragment.append(curr.remove_center())
+            to_augment.append(curr.remove_center())
+
         if curr.get_quadrant(0, 0).dims[0] >= min_size:
             for i in range(0, 2):
                 for j in range(0, 2):
