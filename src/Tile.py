@@ -115,10 +115,10 @@ class Tile:
 
     def get_pieces(self, n=9):
         """
-        Returns n pieces; original image is cut in nxn by row and col
+        Returns n pieces; original image is cut in n x n by row and col
 
         :param n: number of pieces to cut by row and col
-        :return: nxn new tiles cut out from current tile
+        :return: n x n new tiles cut out from current tile
         """
 
         tile_list = []
