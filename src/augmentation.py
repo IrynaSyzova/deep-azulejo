@@ -1,9 +1,10 @@
 import numpy as np
 
 from collections import deque
-from itertools import product
+from itertools import product, combinations
 
 from src import Tile
+from src import image_utils
 
 
 def rearrange(tile, min_size, max_size):
@@ -59,7 +60,7 @@ def rearrange(tile, min_size, max_size):
     return fragments
 
 
-def colour(tile):
+def enrich_colour(tile):
     """
     Returns a list of tiles obtained from starting tile by recolouring it.
 
@@ -71,6 +72,19 @@ def colour(tile):
     return [Tile.Tile(np.array([img[..., _[0]], img[..., _[1]], img[..., _[2]]]).transpose())
             for _ in channels
             if len(set(_)) > 1]
+
+
+def enrich_contrast(tile):
+    """
+    Returns a list of tiles obtained from starting tile 
+    by increasing contrast in different colour channels.
+
+    :param tile: starting tile
+    :return: list of re-contrasted tiles
+    """
+    img = tile.img
+    channels = list(combinations([0, 1, 2], 1)) + list(combinations([0, 1, 2], 2))
+    return [Tile.Tile(image_utils.increase_contrast(img, _)) for _ in channels]
 
 
 def enrich(tile, min_size, max_size):
@@ -86,6 +100,8 @@ def enrich(tile, min_size, max_size):
     result = deque()
     while rearranged:
         curr = rearranged.pop()
-        result.extend(colour(curr))
+        curr_contrasts = enrich_contrast(curr)
+        for curr_contrasting in curr_contrasts + [curr]:
+            result.extend(enrich_colour(curr_contrasting))
 
     return list(result)

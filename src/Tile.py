@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import math
 import warnings
 
-from src import io_utils
+from src import io_utils, image_utils
 
 
 class Tile:
@@ -17,20 +17,23 @@ class Tile:
     """
 
     def __init__(self, img):
-        if img.shape[0] != img.shape[1]:
-            raise ValueError('Image must be square to be a tile (image shape is {}x{}).'.format(*img.shape))
+        if np.abs(img.shape[0] - img.shape[1]) == 1:
+            img = image_utils.crop(img)
+        elif img.shape[0] != img.shape[1]:
+            raise ValueError(
+                'Image must be square to be a tile (image shape is {}x{}).'.format(*img.shape)
+            )
         self.img = img
         self.dims = img.shape
 
     # Plotting
-    @classmethod
-    def plot(cls, tile):
+    def plot(self):
         """
         Plots a tile
 
         :param tile: tile to plot
         """
-        plt.imshow(tile.img)
+        plt.imshow(self.img)
         plt.axis('off')
         plt.show()
 
@@ -203,17 +206,17 @@ class Tile:
                         subtiles[0].img,
                         subtiles[2].img
                     ),
-                    axis=0
+                    axis=1
                 ),
                 np.concatenate(
                     (
                         subtiles[6].img,
                         subtiles[8].img
                     ),
-                    axis=0
+                    axis=1
                 )
             ),
-            axis=1
+            axis=0
         )
 
         return Tile(result)
