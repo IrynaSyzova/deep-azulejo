@@ -47,6 +47,7 @@ def rearrange(tile, min_size, max_size):
     while to_augment:
         curr = to_augment.pop()
         fragments.append(curr.get_rhombus())
+        to_augment.append(curr.get_rhombus())
 
         if curr.dims[0] * 4 <= max_size:
             for i in range(0, 2):
