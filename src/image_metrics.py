@@ -22,7 +22,7 @@ def image_aspect_ratio(img):
 
 def tile_uniform_contrast(tile, n_pieces=8):
     """
-    Checks contrasts in tile cut into n_pieces, returns average contrast in pieces
+    Checks contrasts in tile cut into n_pieces x n_pieces, returns average contrast in pieces
     :param tile: tile to check
     :param n_pieces: number of pieces to check individually
     :return: contrast measure, with 0 being least contrast and 1 being most contrast
@@ -30,6 +30,7 @@ def tile_uniform_contrast(tile, n_pieces=8):
     channels = (0, 1, 2)
     
     intensity = [tile.img[:, :, k].max() - tile.img[:, :, k].min() for k in channels]
+    # max difference per channel
 
     tile_list = tile.get_pieces(n_pieces)
     
@@ -49,6 +50,10 @@ def tile_symmetry(tile, metric, agg, **kwargs):
     Checks symmetry of tile using provided metric and aggregation function agg.
     I check symmetry of tile itself + it's middle third,
     assuming that middle third is one of the most important parts of the image
+    Example:
+    ooo
+    oxo => x is middle third
+    ooo
     :param tile: tile to check
     :param metric: function of 2 images that indicates their similarity
     :param agg: aggregation function
