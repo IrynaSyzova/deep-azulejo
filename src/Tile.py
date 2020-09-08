@@ -144,7 +144,7 @@ class Tile:
         :return: new tile cut out from current tile
         """
         if ratio >= 1 or ratio <= 0:
-            raise Exception('Ratop must be between 0 and 1')
+            raise Exception('Ratio must be between 0 and 1')
 
         row_start = int(self.dims[0] * (1 - ratio) / 2.0)
         row_end = int(self.dims[0] * (1 + ratio) / 2.0)
