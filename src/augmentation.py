@@ -10,6 +10,21 @@ from src import image_utils
 import logging
 
 logger = logging.getLogger(__name__)
+# TODO: Move away
+logger.setLevel(logging.DEBUG)
+
+# create console handler and set level to debug
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+
+# create formatter
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+# add formatter to ch
+ch.setFormatter(formatter)
+
+# add ch to logger
+logger.addHandler(ch)
 
 
 def enrich(tile, save_func, scale_min=0.25, scale_max=4):
