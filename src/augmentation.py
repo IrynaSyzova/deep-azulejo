@@ -24,8 +24,8 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4):
     """
     logger.info('Enriching tile of {} dims'.format(tile.dims))
 
-    min_size = int(tile.img.dims[0] * scale_min)
-    max_size = tile.img.dims[0] // scale_max
+    min_size = int(tile.dims[0] * scale_min)
+    max_size = tile.dims[0] // scale_max
 
     def __save_tile(tile_save):
         logger.info('Saving tile of {} dims.'.format(tile_save.dims))
