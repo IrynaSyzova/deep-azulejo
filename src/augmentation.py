@@ -112,5 +112,7 @@ def enrich_contrast(tile):
     """
     logger.info('Re-contrasting tile')
     img = tile.img
+    img_contrast = image_utils.increase_contrast(img, [0, 1, 2])
     channels = list(combinations([0, 1, 2], 1)) + list(combinations([0, 1, 2], 2))
-    return [Tile.Tile(image_utils.increase_contrast(img, _)) for _ in channels]
+    return [Tile.Tile(image_utils.assemble_img_by_channel(img, img_contrast, _)) for _ in channels]
+
