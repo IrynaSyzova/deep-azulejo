@@ -56,8 +56,21 @@ def increase_contrast(img, channels=(0, 1, 2)):
     :return: altered image
     """
     equalized = [cv2.equalizeHist(img[:, :, k]) for k in (0, 1, 2)]
+    equalized_img = np.array(
+        [
+            [
+                [
+                    equalized[k][i, j]
+                    for k
+                    in (0, 1, 2)
+                ]
+                for j in range(img.shape[0])
+            ]
+            for i in range(img.shape[1])
+        ]
+    )
 
-    return assemble_img_by_channel(equalized, img, channels)
+    return assemble_img_by_channel(equalized_img, img, channels)
 
 
 def assemble_img_by_channel(img1, img2, channels):
