@@ -7,26 +7,33 @@ from itertools import product, combinations
 from src import Tile
 from src import image_utils
 
+import logging
 
-def enrich(tile, save_func, scale_min=4, scale_max=4):
+logger = logging.getLogger(__name__)
+
+
+def enrich(tile, save_func, scale_min=0.25, scale_max=4):
     """
     Creates a list of new tiles obtained by cutting and gluing current tile.
 
     :param tile: starting tile
     :param save_func: function to write generated images; should be called as save_func(image, image_path)
-    :param scale_min: how small minimum size of obtained tile can be relative to starting tile
-    :param scale_max: how big maximum size of obtained tile can be relative to starting tile
+    :param scale_min: how small minimum size of obtained tile can be relative to starting tile by dimension
+    :param scale_max: how big maximum size of obtained tile can be relative to starting tile by dimension
     :return: None
     """
+    logger.info('Enriching tile of {} dims'.format(tile.dims))
 
-    min_size = tile.img.dims[0] // scale_min
+    min_size = int(tile.img.dims[0] * scale_min)
     max_size = tile.img.dims[0] // scale_max
 
-    def __save_tile(tile):
-        for x in enrich_colour(tile):
+    def __save_tile(tile_save):
+        logger.info('Saving tile of {} dims.'.format(tile_save.dims))
+        for x in enrich_colour(tile_save):
             for y in enrich_contrast(x):
                 img_name = str(uuid.uuid4())
                 save_func(y.img, '{}.jpg'.format(img_name))
+        logger.info('Saving finished.')
 
     to_fragment = deque()
     to_augment = deque()
@@ -57,6 +64,10 @@ def enrich(tile, save_func, scale_min=4, scale_max=4):
         if curr.dims[0] * 4 <= max_size:
             to_augment.append(curr)
 
+        logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
+            len(to_fragment), len(to_augment)
+        ))
+
     while to_augment:
         curr = to_augment.pop()
         rhombus = curr.get_rhombus()
@@ -83,6 +94,7 @@ def enrich_colour(tile):
     :param tile: starting tile
     :return: list of recoloured tiles
     """
+    logger.info('Recolouring tile')
     img = tile.img
     channels = product([0, 1, 2], repeat=3)
     return [Tile.Tile(np.array([img[..., _[0]], img[..., _[1]], img[..., _[2]]]).transpose())
@@ -98,6 +110,7 @@ def enrich_contrast(tile):
     :param tile: starting tile
     :return: list of re-contrasted tiles
     """
+    logger.info('Re-contrasting tile')
     img = tile.img
     channels = list(combinations([0, 1, 2], 1)) + list(combinations([0, 1, 2], 2))
     return [Tile.Tile(image_utils.increase_contrast(img, _)) for _ in channels]
