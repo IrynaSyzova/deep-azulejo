@@ -112,7 +112,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
             for i in range(0, 2):
                 for j in range(0, 2):
                     unfolded = curr.assemble_quadrant_unfold(i, j)
-                    to_augment.append(unfolded)
+                    # to_augment.append(unfolded)
 
                     counter += __save_tile(unfolded)
                     if counter >= max_imgs:
@@ -126,7 +126,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
                         return
 
                     unfolded_no_center = unfolded.remove_center()
-                    # to_augment.append(unfolded_no_center)
+                    to_augment.append(unfolded_no_center)
 
                     counter += __save_tile(unfolded_no_center)
                     if counter >= max_imgs:
@@ -134,7 +134,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
 
 
             windmill = curr.assemble_quadrant_windmill()
-            to_augment.append(windmill)
+            # to_augment.append(windmill)
 
             counter += __save_tile(windmill)
             if counter >= max_imgs:
@@ -150,7 +150,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
             windmill_no_center = windmill.remove_center()
             to_augment.append(windmill_no_center)
 
-            # counter += __save_tile(windmill_no_center)
+            counter += __save_tile(windmill_no_center)
             if counter >= max_imgs:
                 return
         logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
