@@ -9,6 +9,9 @@ from src import Tile, logging_utils
 
 logger = logging_utils.get_logger(__name__)
 
+SOLID_BORDER_THICKNESS = 0.05
+REFLECT_BORDER_THICKNESS = 0.5
+
 
 def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
     """
@@ -91,14 +94,14 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
 
     while to_augment:
         curr = to_augment.pop()
-        border_constant = curr.add_border(border_thickness=0.05, border_type=cv2.BORDER_REPLICATE)
+        border_constant = curr.add_border(border_thickness=SOLID_BORDER_THICKNESS, border_type=cv2.BORDER_REPLICATE)
 
         counter += __save_tile(border_constant)
         if counter >= max_imgs:
             return
 
         if curr.dims[0] * 1.3 <= max_size:
-            border_reflect = curr.add_border(border_thickness=0.15, border_type=cv2.BORDER_REFLECT)
+            border_reflect = curr.add_border(border_thickness=REFLECT_BORDER_THICKNESS, border_type=cv2.BORDER_REFLECT)
             to_augment.append(border_reflect)
 
             counter += __save_tile(border_reflect)
