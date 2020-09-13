@@ -6,11 +6,10 @@ from collections import deque
 from itertools import product, combinations
 
 from src import Tile
-from src import image_utils
 
-import logging
+import logging_utils
 
-logger = logging.getLogger(__name__)
+logger = logging_utils.get_logger(__name__)
 
 
 def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
