@@ -5,9 +5,7 @@ import cv2
 from collections import deque
 from itertools import product, combinations
 
-from src import Tile
-
-import logging_utils
+from src import Tile, logging_utils
 
 logger = logging_utils.get_logger(__name__)
 
