@@ -9,6 +9,9 @@ from src import Tile, logging_utils
 
 logger = logging_utils.get_logger(__name__)
 
+SOLID_BORDER_THICKNESS = 0.05
+REFLECT_BORDER_THICKNESS = 0.5
+
 
 def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
     """
@@ -91,14 +94,15 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
 
     while to_augment:
         curr = to_augment.pop()
-        border_constant = curr.add_border(border_thickness=0.05, border_type=cv2.BORDER_REPLICATE)
+        if curr.dims[0] * (1 + 2 * SOLID_BORDER_THICKNESS) <= max_size:
+            border_constant = curr.add_border(border_thickness=SOLID_BORDER_THICKNESS, border_type=cv2.BORDER_REPLICATE)
 
-        counter += __save_tile(border_constant)
-        if counter >= max_imgs:
-            return
+            counter += __save_tile(border_constant)
+            if counter >= max_imgs:
+                return
 
-        if curr.dims[0] * 1.3 <= max_size:
-            border_reflect = curr.add_border(border_thickness=0.15, border_type=cv2.BORDER_REFLECT)
+        if curr.dims[0] * (1+2*REFLECT_BORDER_THICKNESS) <= max_size:
+            border_reflect = curr.add_border(border_thickness=REFLECT_BORDER_THICKNESS, border_type=cv2.BORDER_REFLECT)
             to_augment.append(border_reflect)
 
             counter += __save_tile(border_reflect)
@@ -150,6 +154,9 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
             counter += __save_tile(windmill_no_center)
             if counter >= max_imgs:
                 return
+        logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
+            len(to_fragment), len(to_augment)
+        ))
 
 
 def enrich_colour(tile):
