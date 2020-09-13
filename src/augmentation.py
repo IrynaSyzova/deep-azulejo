@@ -26,7 +26,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
     """
 
     min_size = int(tile.dims[0] * scale_min)
-    max_size = tile.dims[0] * scale_max
+    max_size = int(tile.dims[0] * scale_max)
 
     logger.info('Enriching tile of {x}x{x} dims; generated tiles will be from {y}x{y} to {z}x{z}'.format(
         x=tile.dims[0],
@@ -60,28 +60,33 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
         if counter >= max_imgs:
             return
 
-        rhombus = curr.get_rhombus()
-        if rhombus.dims[0] >= min_size:
-            to_fragment.append(rhombus)
-            to_augment.append(rhombus)
+        if curr.dims[0] / 2 * 2**2 >= min_size:
+            rhombus = curr.get_rhombus()
+            if rhombus.dims[0] >= min_size:
+                to_fragment.append(rhombus)
+                to_augment.append(rhombus)
 
-            counter += __save_tile(rhombus)
-            if counter >= max_imgs:
-                return
+                counter += __save_tile(rhombus)
+                if counter >= max_imgs:
+                    return
 
-        no_center = curr.remove_center()
-        if no_center.dims[0] >= min_size:
-            to_fragment.append(no_center)
-            to_augment.append(no_center)
+        if curr.dims[0] / 3 * 2 >= min_size:
+            no_center = curr.remove_center()
+            if no_center.dims[0] >= min_size:
+                to_fragment.append(no_center)
+                to_augment.append(no_center)
 
             counter += __save_tile(no_center)
             if counter >= max_imgs:
                 return
 
-        if curr.get_quadrant(0, 0).dims[0] >= min_size:
+        if curr.dims[0] / 2 >= min_size:
             for i in range(0, 2):
                 for j in range(0, 2):
-                    counter += __save_tile(curr.get_quadrant(i, j))
+                    quadrant = curr.get_quadrant(i, j)
+                    to_fragment.append(quadrant)
+                    to_augment.append(quadrant)
+                    counter += __save_tile(quadrant)
                     if counter >= max_imgs:
                         return
 
@@ -94,12 +99,6 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
 
     while to_augment:
         curr = to_augment.pop()
-        if curr.dims[0] * (1 + 2 * SOLID_BORDER_THICKNESS) <= max_size:
-            border_constant = curr.add_border(border_thickness=SOLID_BORDER_THICKNESS, border_type=cv2.BORDER_REPLICATE)
-
-            counter += __save_tile(border_constant)
-            if counter >= max_imgs:
-                return
 
         if curr.dims[0] * (1+2*REFLECT_BORDER_THICKNESS) <= max_size:
             border_reflect = curr.add_border(border_thickness=REFLECT_BORDER_THICKNESS, border_type=cv2.BORDER_REFLECT)
@@ -120,14 +119,14 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
                         return
 
                     unfolded_rhombus = unfolded.get_rhombus()
-                    to_augment.append(unfolded_rhombus)
+                    # to_augment.append(unfolded_rhombus)
 
                     counter += __save_tile(unfolded_rhombus)
                     if counter >= max_imgs:
                         return
 
                     unfolded_no_center = unfolded.remove_center()
-                    to_augment.append(unfolded_no_center)
+                    # to_augment.append(unfolded_no_center)
 
                     counter += __save_tile(unfolded_no_center)
                     if counter >= max_imgs:
@@ -142,7 +141,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
                 return
 
             windmill_rhombus = windmill.get_rhombus()
-            to_augment.append(windmill_rhombus)
+            # to_augment.append(windmill_rhombus)
 
             counter += __save_tile(windmill_rhombus)
             if counter >= max_imgs:
@@ -151,7 +150,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
             windmill_no_center = windmill.remove_center()
             to_augment.append(windmill_no_center)
 
-            counter += __save_tile(windmill_no_center)
+            # counter += __save_tile(windmill_no_center)
             if counter >= max_imgs:
                 return
         logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
