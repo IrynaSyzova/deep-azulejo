@@ -21,10 +21,15 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
     :param max_imgs: when reached max_imgs, function will exit
     :return: None
     """
-    logger.info('Enriching tile of {} dims'.format(tile.dims))
 
     min_size = int(tile.dims[0] * scale_min)
-    max_size = tile.dims[0] // scale_max
+    max_size = tile.dims[0] * scale_max
+
+    logger.info('Enriching tile of {x}x{x} dims; generated tiles will be from {y}x{y} to {z}x{z}'.format(
+        x=tile.dims[0],
+        y=min_size,
+        z=max_size
+    ))
 
     counter = 0
 
@@ -34,12 +39,10 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
         :param tile_save: tile to save
         :return: number of tiles saved
         """
-        logger.info('Saving tile of {} dims.'.format(tile_save.dims))
         tile_colours = enrich_colour(tile_save)
         for x in tile_colours:
             img_name = str(uuid.uuid4())
             save_func(x.img, '{}.jpg'.format(img_name))
-        logger.info('Saving finished.')
         return len(tile_colours)
 
     to_fragment = deque()
@@ -94,7 +97,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
         if counter >= max_imgs:
             return
 
-        if curr.dims[0] * 1.15 <= max_size:
+        if curr.dims[0] * 1.3 <= max_size:
             border_reflect = curr.add_border(border_thickness=0.15, border_type=cv2.BORDER_REFLECT)
             to_augment.append(border_reflect)
 
@@ -156,7 +159,6 @@ def enrich_colour(tile):
     :param tile: starting tile
     :return: list of recoloured tiles
     """
-    logger.info('Recolouring tile')
     img = tile.img
     channels = product([0, 1, 2], repeat=3)
     return [Tile.Tile(np.array([img[..., _[0]], img[..., _[1]], img[..., _[2]]]).transpose())
