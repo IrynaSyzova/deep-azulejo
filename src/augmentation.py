@@ -72,7 +72,6 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4):
     while to_augment:
         curr = to_augment.pop()
         border_constant = curr.add_border(border_thickness=0.05, border_type=cv2.BORDER_REPLICATE)
-        to_augment.append(border_constant)
         __save_tile(border_constant)
 
         border_reflect = curr.add_border(border_thickness=0.15, border_type=cv2.BORDER_REFLECT)
