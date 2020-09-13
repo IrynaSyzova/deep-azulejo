@@ -55,45 +55,18 @@ def increase_contrast(img, channels=(0, 1, 2)):
     :param channels: list of channels to increase contrast in
     :return: altered image
     """
-    equalized = [cv2.equalizeHist(img[:, :, k]) for k in (0, 1, 2)]
-    equalized_img = np.array(
-        [
-            [
-                [
-                    equalized[k][i, j]
-                    for k
-                    in (0, 1, 2)
-                ]
-                for j in range(img.shape[0])
-            ]
-            for i in range(img.shape[1])
-        ]
-    )
+    equalized = [cv2.equalizeHist(img[:, :, k]) if k in channels else img[:, :, k] for k in (0, 1, 2)]
 
-    return assemble_img_by_channel(equalized_img, img, channels)
-
-
-def assemble_img_by_channel(img1, img2, channels):
-    """
-    Assembles a new image by using layers from img1 and img2;
-    for colour channels in channels we use img1, otherwise img2;
-    E.g.: for channels = [0, 1, 2] result will be img1, for channels = [], result will be img2
-    :param img1: starting image
-    :param img2: another starting image
-    :param channels: colour channels to take from image 1
-    :return: new image
-    """
-    result = [img1[:, :, k] if k in channels else img2[:, :, k] for k in (0, 1, 2)]
     return np.array(
         [
             [
                 [
-                    result[k][i, j]
-                    for k
-                    in (0, 1, 2)
+                    equalized[k][i, j]
+                     for k
+                     in (0, 1, 2)
                 ]
-            for j in range(img1.shape[0])
+            for j in range(img.shape[0])
             ]
-            for i in range(img1.shape[1])
+            for i in range(img.shape[1])
         ]
     )
