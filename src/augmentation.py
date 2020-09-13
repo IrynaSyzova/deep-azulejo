@@ -126,7 +126,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
                         return
 
                     unfolded_no_center = unfolded.remove_center()
-                    to_augment.append(unfolded_no_center)
+                    # to_augment.append(unfolded_no_center)
 
                     counter += __save_tile(unfolded_no_center)
                     if counter >= max_imgs:
@@ -148,7 +148,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
                 return
 
             windmill_no_center = windmill.remove_center()
-            to_augment.append(windmill_no_center)
+            # to_augment.append(windmill_no_center)
 
             counter += __save_tile(windmill_no_center)
             if counter >= max_imgs:
