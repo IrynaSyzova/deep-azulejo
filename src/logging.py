@@ -3,7 +3,6 @@ import sys
 
 def getLogger(name):
     logger = logging.getLogger(name)
-    # TODO: Move away
     logger.setLevel(logging.DEBUG)
 
     # create console handler and set level to debug
@@ -18,3 +17,5 @@ def getLogger(name):
 
     # add ch to logger
     logger.addHandler(ch)
+
+    return logger
