@@ -30,9 +30,8 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4):
     def __save_tile(tile_save):
         logger.info('Saving tile of {} dims.'.format(tile_save.dims))
         for x in enrich_colour(tile_save):
-            for y in enrich_contrast(x):
-                img_name = str(uuid.uuid4())
-                save_func(y.img, '{}.jpg'.format(img_name))
+            img_name = str(uuid.uuid4())
+            save_func(x.img, '{}.jpg'.format(img_name))
         logger.info('Saving finished.')
 
     to_fragment = deque()
@@ -55,6 +54,16 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4):
             to_fragment.append(no_center)
             to_augment.append(no_center)
             __save_tile(no_center)
+
+            border_constant = curr.add_border(border_type=cv2.BORDER_REPLICATE)
+            to_fragment.append(border_constant)
+            to_augment.append(border_constant)
+            __save_tile(border_constant)
+
+            border_reflect = curr.add_border(border_type=cv2.BORDER_REFLECT)
+            to_fragment.append(border_reflect)
+            to_augment.append(border_reflect)
+            __save_tile(border_reflect)
 
         if curr.get_quadrant(0, 0).dims[0] >= min_size:
             for i in range(0, 2):
@@ -100,19 +109,3 @@ def enrich_colour(tile):
     return [Tile.Tile(np.array([img[..., _[0]], img[..., _[1]], img[..., _[2]]]).transpose())
             for _ in channels
             if len(set(_)) > 1]
-
-
-def enrich_contrast(tile):
-    """
-    Returns a list of tiles obtained from starting tile 
-    by increasing contrast in different colour channels.
-
-    :param tile: starting tile
-    :return: list of re-contrasted tiles
-    """
-    logger.info('Re-contrasting tile')
-    img = tile.img
-    img_contrast = image_utils.increase_contrast(img, [0, 1, 2])
-    channels = list(combinations([0, 1, 2], 1)) + list(combinations([0, 1, 2], 2))
-    return [Tile.Tile(image_utils.assemble_img_by_channel(img, img_contrast, _)) for _ in channels]
-
