@@ -44,8 +44,10 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
         """
         tile_colours = enrich_colour(tile_save)
         for x in tile_colours:
+            logger.info('Saving img of {} dims.'.format(x.dims))
             img_name = str(uuid.uuid4())
             save_func(x.img, '{}.jpg'.format(img_name))
+            logger.info('Finished saving.')
         return len(tile_colours)
 
     to_fragment = deque()
@@ -132,27 +134,6 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
                     if counter >= max_imgs:
                         return
 
-
-            windmill = curr.assemble_quadrant_windmill()
-            # to_augment.append(windmill)
-
-            counter += __save_tile(windmill)
-            if counter >= max_imgs:
-                return
-
-            windmill_rhombus = windmill.get_rhombus()
-            # to_augment.append(windmill_rhombus)
-
-            counter += __save_tile(windmill_rhombus)
-            if counter >= max_imgs:
-                return
-
-            windmill_no_center = windmill.remove_center()
-            # to_augment.append(windmill_no_center)
-
-            counter += __save_tile(windmill_no_center)
-            if counter >= max_imgs:
-                return
         logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
             len(to_fragment), len(to_augment)
         ))
