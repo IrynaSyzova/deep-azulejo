@@ -32,7 +32,7 @@ def read_imgs(file_list, folder=''):
     :return: list of images
     """
     return [
-        cv2.imread('{}/{}'.format(folder, img_file))[...,::-1]
+        cv2.cvtColor(cv2.imread('{}/{}'.format(folder, img_file)), cv2.COLOR_BGR2RGB)
         for img_file in
         file_list
     ]
