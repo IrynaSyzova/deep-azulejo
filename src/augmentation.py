@@ -56,12 +56,12 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4):
             to_augment.append(no_center)
             __save_tile(no_center)
 
-            border_constant = curr.add_border(border_type=cv2.BORDER_REPLICATE)
+            border_constant = curr.add_border(border_thickness=0.05, border_type=cv2.BORDER_REPLICATE)
             to_fragment.append(border_constant)
             to_augment.append(border_constant)
             __save_tile(border_constant)
 
-            border_reflect = curr.add_border(border_type=cv2.BORDER_REFLECT)
+            border_reflect = curr.add_border(border_thickness=0.15, border_type=cv2.BORDER_REFLECT)
             to_fragment.append(border_reflect)
             to_augment.append(border_reflect)
             __save_tile(border_reflect)
