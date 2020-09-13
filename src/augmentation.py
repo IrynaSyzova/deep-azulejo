@@ -1,5 +1,6 @@
 import numpy as np
 import uuid
+import cv2
 
 from collections import deque
 from itertools import product, combinations
