@@ -102,7 +102,7 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
 
         if curr.dims[0] * (1+2*REFLECT_BORDER_THICKNESS) <= max_size:
             border_reflect = curr.add_border(border_thickness=REFLECT_BORDER_THICKNESS, border_type=cv2.BORDER_REFLECT)
-            to_augment.append(border_reflect)
+            # to_augment.append(border_reflect)
 
             counter += __save_tile(border_reflect)
             if counter >= max_imgs:
