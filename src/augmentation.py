@@ -150,6 +150,9 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4, max_imgs=5000):
             counter += __save_tile(windmill_no_center)
             if counter >= max_imgs:
                 return
+        logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
+            len(to_fragment), len(to_augment)
+        ))
 
 
 def enrich_colour(tile):
