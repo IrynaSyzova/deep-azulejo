@@ -57,15 +57,6 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4):
             to_augment.append(no_center)
             __save_tile(no_center)
 
-        border_constant = curr.add_border(border_thickness=0.05, border_type=cv2.BORDER_REPLICATE)
-        to_augment.append(border_constant)
-        __save_tile(border_constant)
-
-        border_reflect = curr.add_border(border_thickness=0.15, border_type=cv2.BORDER_REFLECT)
-        to_fragment.append(border_reflect)
-        to_augment.append(border_reflect)
-        __save_tile(border_reflect)
-
         if curr.get_quadrant(0, 0).dims[0] >= min_size:
             for i in range(0, 2):
                 for j in range(0, 2):
@@ -80,6 +71,14 @@ def enrich(tile, save_func, scale_min=0.25, scale_max=4):
 
     while to_augment:
         curr = to_augment.pop()
+        border_constant = curr.add_border(border_thickness=0.05, border_type=cv2.BORDER_REPLICATE)
+        to_augment.append(border_constant)
+        __save_tile(border_constant)
+
+        border_reflect = curr.add_border(border_thickness=0.15, border_type=cv2.BORDER_REFLECT)
+        to_augment.append(border_reflect)
+        __save_tile(border_reflect)
+
         rhombus = curr.get_rhombus()
         to_augment.append(rhombus)
         __save_tile(rhombus)
