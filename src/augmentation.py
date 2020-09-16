@@ -44,13 +44,21 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
         logger.info('Finished saving.')
         return img_path
 
+    def __read_tile(key):
+        """
+        Reads image from s3 and converts it to Tile type
+        :param key: path to read image from
+        :return: Tile
+        """
+        return Tile(s3_utils.read_image_from_s3(key))
+
     to_fragment, to_fragment_key = deque(), '{}/to_fragment'.format(key)
     to_augment, to_augment_key = deque(), '{}/to_augment'.format(key)
 
     to_fragment.append(__save_tile(tile, to_fragment_key))
 
     while to_fragment:
-        curr = s3_utils.read_image_from_s3(to_fragment.popleft())
+        curr = __read_tile(to_fragment.popleft())
 
         _ = __save_tile(curr, key)
 
@@ -85,7 +93,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
         ))
 
     while to_augment:
-        curr = s3_utils.read_image_from_s3(to_augment.pop())
+        curr = __read_tile(to_augment.pop())
 
         reflect_border_thickness = 0.5
         if curr.dims[0] * (1+2*reflect_border_thickness) <= max_size:
