@@ -41,7 +41,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
         logger.debug('Saving img of {} dims.'.format(tile_save.dims))
         img_path = '{}/{}.jpg'.format(key, str(uuid.uuid4()))
         s3_utils.write_image_to_s3(tile_save.img, img_path)
-        logger.info('Finished saving.')
+        logger.debug('Finished saving.')
         return img_path
 
     def __read_tile(key):
