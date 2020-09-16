@@ -127,8 +127,7 @@ def enrich_colour(tile):
     """
     channels = product([0, 1, 2], repeat=3)
     return [recolour_tile(tile, _)
-            for _ in channels
-            if len(set(_)) > 1]
+            for _ in channels]
 
 
 def recolour_tile(tile, channels):
@@ -138,7 +137,7 @@ def recolour_tile(tile, channels):
     :param channels: colour channels
     :return: recoloured tile
     """
-    img = tile.img
+    img = tile.img.copy()
     for i in (0, 1, 2):
         img[..., i] = tile.img[..., channels[i]]
     return Tile(img)
