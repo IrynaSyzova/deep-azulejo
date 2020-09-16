@@ -27,7 +27,7 @@ def plot_sample_files_from_list(file_list, folder='', plot_sample=12, cols=6):
     plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols)
 
 
-def plot_sample_files_from_bucket(key, plot_sample=12, cols=6):
+def plot_sample_files_from_s3(key, plot_sample=12, cols=6):
     """
     Plots random sample of images from s3 key provided
     :param key: path in s3
