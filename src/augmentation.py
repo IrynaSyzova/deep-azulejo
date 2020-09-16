@@ -5,7 +5,8 @@ import cv2
 from collections import deque
 from itertools import product, combinations
 
-from src import Tile, logging_utils, s3_utils
+from src import logging_utils, s3_utils
+from src.Tile import Tile
 
 logger = logging_utils.get_logger(__name__)
 
@@ -142,4 +143,4 @@ def recolour_tile(tile, channels):
     img = tile.img
     for i in (0, 1, 2):
         img[..., i] = tile.img[..., channels[i]]
-    return img
+    return Tile(img)
