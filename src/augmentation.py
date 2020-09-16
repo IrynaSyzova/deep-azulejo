@@ -1,9 +1,8 @@
-import numpy as np
 import uuid
 import cv2
 
 from collections import deque
-from itertools import product, combinations
+from itertools import product
 
 from src import logging_utils, s3_utils
 from src.Tile import Tile
@@ -126,7 +125,6 @@ def enrich_colour(tile):
     :param tile: starting tile
     :return: list of recoloured tiles
     """
-    img = tile.img
     channels = product([0, 1, 2], repeat=3)
     return [recolour_tile(tile, _)
             for _ in channels
