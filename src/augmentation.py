@@ -117,6 +117,9 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
             len(to_fragment), len(to_augment)
         ))
 
+    s3_utils.delete_from_s3(to_augment_key)
+    s3_utils.delete_from_s3(to_fragment_key)
+
 
 def enrich_colour(tile):
     """
