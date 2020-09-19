@@ -13,7 +13,7 @@ logger = logging_utils.get_logger(__name__)
 
 def enrich(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2, max_overall_depth=None):
     if max_overall_depth is None:
-        max_overall_depth = max(4, max_fragmentation_depth+1, max_augmentation_depth+1)
+        max_overall_depth = max(4, max_fragmentation_depth, max_augmentation_depth)
     temp_key = '{}/temp'.format(key)
     __enrich(__save_tile(tile, temp_key), key, temp_key, max_fragmentation_depth, max_augmentation_depth,
              max_overall_depth)
@@ -35,7 +35,6 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
     tile = __read_tile(tile_path)
 
     _ = __save_tile(tile, key)
-    _ = __save_tile(tile.add_border_reflect(border_thickness=0.33), key)
 
     if max_overall_depth > 0:
 
@@ -64,20 +63,18 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
             __enrich(__save_tile(tile.add_border_reflect(border_thickness=0.5), temp_key), key, temp_key,
                      max_fragmentation_depth,
                      max_augmentation_depth - 1,
-                     max_overall_depth - 1
-                     )
+                     max_overall_depth - 1)
 
             __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0), temp_key), key, temp_key,
                      max(1, max_fragmentation_depth),
                      max_augmentation_depth - 1,
                      max_overall_depth - 1)
 
-            if max_fragmentation_depth > 0 and max_overall_depth > 0:
+            if max_fragmentation_depth > 0:
                 __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0).remove_center(), temp_key), key, temp_key,
                          max_fragmentation_depth - 1,
                          max_augmentation_depth - 1,
-                         max_overall_depth - 1
-                         )
+                         max_overall_depth - 1)
 
 
 def __save_tile(tile_save, key):
