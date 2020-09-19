@@ -1,10 +1,12 @@
 import uuid
+from skimage.metrics import structural_similarity
 
 from src import logging_utils, s3_utils, image_utils
 from src.Tile import Tile
 
 MIN_SIZE = 64
 MAX_SIZE = 2500
+MAX_SIMILARITY = 0.7
 
 logger = logging_utils.get_logger(__name__)
 
@@ -34,13 +36,17 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
         max_fragmentation_depth = 0
 
     if max_fragmentation_depth > 0 and max_overall_depth > 0:
+
         fragments = [
             __save_tile(tile.get_rhombus(), temp_key),
             __save_tile(tile.get_quadrant(0, 0), temp_key),
-            __save_tile(tile.get_quadrant(0, 1).rotate(clockwise=False), temp_key),
-            __save_tile(tile.get_quadrant(1, 0).rotate(clockwise=True), temp_key),
-            __save_tile(tile.get_quadrant(1, 1).rotate().rotate(), temp_key),
         ]
+        if __similarity(tile.get_quadrant(0,0), tile.get_quadrant(1, 0).rotate(clockwise=True)) <= MAX_SIMILARITY:
+            fragments += [
+                __save_tile(tile.get_quadrant(0, 1).rotate(clockwise=False), temp_key),
+                __save_tile(tile.get_quadrant(1, 0).rotate(clockwise=True), temp_key),
+                __save_tile(tile.get_quadrant(1, 1).rotate().rotate(), temp_key)
+            ]
         for fragment in fragments:
             __enrich(fragment, key, temp_key, max_fragmentation_depth - 1, max_augmentation_depth,
                      max_overall_depth - 1)
@@ -87,3 +93,6 @@ def __read_tile(key):
     :return: Tile
     """
     return Tile(s3_utils.read_image_from_s3(key))
+
+def __similarity(tile1, tile2):
+    return structural_similarity(tile1.img, tile2.img, multichannel=True)
