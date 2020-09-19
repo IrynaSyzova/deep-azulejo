@@ -21,14 +21,14 @@ def enrich(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2, max_o
 
 
 def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentation_depth=2, max_overall_depth=4):
-    logger.info('Fragmentation depth: {}, augmentation depth: {}, overall depth: {}'.format(
+    logger.debug('Fragmentation depth: {}, augmentation depth: {}, overall depth: {}'.format(
         max_fragmentation_depth, max_augmentation_depth, max_overall_depth
     ))
 
     imgs_in_key = len(s3_utils.get_image_list_from_s3(key))
     imgs_in_temp_key = len(s3_utils.get_image_list_from_s3(temp_key))
 
-    logger.info('{} images created'.format(
+    logger.debug('{} images created'.format(
         imgs_in_key - imgs_in_temp_key
     ))
 
@@ -85,10 +85,8 @@ def __save_tile(tile_save, key):
     """
     if tile_save.dims[0] >= MAX_SIZE:
         tile_save = Tile(image_utils.resize(tile_save.img, (MAX_SIZE, MAX_SIZE)))
-    logger.debug('Saving img of {} dims.'.format(tile_save.dims))
     img_path = '{}/{}.jpg'.format(key, str(uuid.uuid4()))
     s3_utils.write_image_to_s3(tile_save.img, img_path)
-    logger.debug('Finished saving.')
     return img_path
 
 
