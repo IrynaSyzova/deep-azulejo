@@ -95,7 +95,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
         reflect_border_thickness = 0.5
         if curr.dims[0] * (1+2*reflect_border_thickness) <= max_size:
             border_reflect = curr.add_border_reflect(border_thickness=reflect_border_thickness)
-            # to_augment.append(__save_tile(border_reflect, to_augment_key))
+            to_augment.append(__save_tile(border_reflect, to_augment_key))
 
             _ = __save_tile(border_reflect, key)
             _ = __save_tile(border_reflect.get_rhombus(), key)
@@ -103,7 +103,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
         reflect_border_thickness = 0.33
         if curr.dims[0] * (1 + 2 * reflect_border_thickness) <= max_size:
             border_reflect = curr.add_border_reflect(border_thickness=reflect_border_thickness)
-            # to_augment.append(__save_tile(border_reflect, to_augment_key))
+            to_augment.append(__save_tile(border_reflect, to_augment_key))
 
             _ = __save_tile(border_reflect, key)
             # _ = __save_tile(border_reflect.remove_center(), key)
@@ -111,7 +111,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
         reflect_border_thickness = 0.25
         if curr.dims[0] * (1 + 2 * reflect_border_thickness) <= max_size:
             border_reflect = curr.add_border_reflect(border_thickness=reflect_border_thickness)
-            # to_augment.append(__save_tile(border_reflect, to_augment_key))
+            to_augment.append(__save_tile(border_reflect, to_augment_key))
             _ = __save_tile(border_reflect, key)
 
             if border_reflect.dims[0] * 2 <= max_size:
@@ -119,7 +119,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
 
         if curr.dims[0] * 2 <= max_size:
             unfolded = curr.assemble_quadrant_unfold(0, 0)
-            # to_augment.append(__save_tile(unfolded, to_augment_key))
+            to_augment.append(__save_tile(unfolded, to_augment_key))
 
             _ = __save_tile(unfolded, key)
             _ = __save_tile(unfolded.get_rhombus(), key)
