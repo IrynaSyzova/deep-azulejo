@@ -1,8 +1,6 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import math
-import warnings
 
 from src import io_utils, image_utils
 
@@ -302,6 +300,22 @@ class Tile:
         return Tile(img_full)
 
     def add_border_reflect(self, border_thickness=0.1):
+        """
+        Adds cv2.BORDER_REFLECT border of border_thickness thickness
+        :param border_thickness: thickness of border
+        :return: tile with border
+        """
         n = int(self.dims[0] * border_thickness)
         return Tile(cv2.copyMakeBorder(self.img, top=n, bottom=n, left=n, right=n, borderType=cv2.BORDER_REFLECT))
 
+    def recolour(self, channels):
+        """
+        Recolours tile by using colour channels[0] for r, channels[1] for g, and channels[2] for b colour channels
+        :param tile: tile to recolour
+        :param channels: colour channels
+        :return: recoloured tile
+        """
+        img = self.img.copy()
+        for i in (0, 1, 2):
+            img[..., i] = self.img[..., channels[i]]
+        return Tile(img)

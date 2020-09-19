@@ -5,7 +5,6 @@ from itertools import product
 
 from src import logging_utils, s3_utils
 from src.Tile import Tile
-from src.image_utils import recolour_tile
 
 logger = logging_utils.get_logger(__name__)
 
@@ -142,6 +141,6 @@ def enrich_colour(tile):
     :return: list of recoloured tiles
     """
     channels = product([0, 1, 2], repeat=3)
-    return [recolour_tile(tile, _)
+    return [tile.recolour(_)
             for _ in channels]
 

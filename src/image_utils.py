@@ -1,7 +1,4 @@
 import cv2
-import numpy as np
-
-from src.Tile import Tile
 
 
 def prepare(img,
@@ -64,15 +61,3 @@ def increase_contrast(img, channels=(0, 1, 2)):
 
     return equalized
 
-
-def recolour_tile(tile, channels):
-    """
-    Recolours tile by using colour channels[0] for r, channels[1] for g, and channels[2] for b colour channels
-    :param tile: tile to recolour
-    :param channels: colour channels
-    :return: recoloured tile
-    """
-    img = tile.img.copy()
-    for i in (0, 1, 2):
-        img[..., i] = tile.img[..., channels[i]]
-    return Tile(img)
