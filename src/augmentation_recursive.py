@@ -17,7 +17,7 @@ def enrich(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2):
 
 def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentation_depth=2):
 
-    logger.info('Current fragmentation depth: {}, current augmentation depth: {}'.format(
+    logger.info('Currently fragmentation depth: {}, augmentation depth: {}'.format(
         max_fragmentation_depth, max_augmentation_depth
     ))
 
