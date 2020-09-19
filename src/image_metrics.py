@@ -1,11 +1,8 @@
 """
 Self-defined functions to measure images according to different properties.
 """
-import cv2
 import numpy as np
-
-from src import image_utils
-from src.Tile import Tile
+from skimage.metrics import structural_similarity as ssim
 
 
 def image_aspect_ratio(img):
@@ -36,7 +33,7 @@ def tile_uniform_contrast(tile, n_pieces=8):
     
     return np.mean([
         min([
-            (tile_piece.img[:, :, k].max() - \
+            (tile_piece.img[:, :, k].max() -
              tile_piece.img[:, :, k].min()) * 1.0 / intensity[k] 
             for tile_piece 
             in tile_list
@@ -45,7 +42,7 @@ def tile_uniform_contrast(tile, n_pieces=8):
     ])
 
 
-def tile_symmetry(tile, metric, agg, **kwargs):
+def tile_symmetry(tile, metric=None, agg=None, **kwargs):
     """
     Checks symmetry of tile using provided metric and aggregation function agg.
     I check symmetry of tile itself + it's middle third,
@@ -60,6 +57,13 @@ def tile_symmetry(tile, metric, agg, **kwargs):
     :param kwargs: args of metric function
     :return: measure of symmetry
     """
+    if metric is None:
+        def similarity_ssim_based(x, y): return ssim(x, y, multichannel=True)
+
+        metric = similarity_ssim_based
+    if agg is None:
+        agg = max
+
     tile_center = tile.get_square_from_center(0.33)
     
     tile_compare = [
