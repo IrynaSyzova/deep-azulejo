@@ -1,7 +1,9 @@
 import uuid
 
-from src import logging_utils, s3_utils
+from src import logging_utils, s3_utils, image_utils
 from src.Tile import Tile
+
+MAX_SIZE = 2500
 
 logger = logging_utils.get_logger(__name__)
 
@@ -58,6 +60,8 @@ def __save_tile(tile_save, key):
     :param key: path to save image
     :return: path to saved file
     """
+    if tile_save.dims[0] >= MAX_SIZE:
+        tile_save = Tile(image_utils.resize(tile_save.img, (MAX_SIZE, MAX_SIZE)))
     logger.debug('Saving img of {} dims.'.format(tile_save.dims))
     img_path = '{}/{}.jpg'.format(key, str(uuid.uuid4()))
     s3_utils.write_image_to_s3(tile_save.img, img_path)
