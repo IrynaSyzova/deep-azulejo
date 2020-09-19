@@ -102,30 +102,24 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
             _ = __save_tile(border_reflect, key)
             _ = __save_tile(border_reflect_rhombus, key)
 
-            to_augment.append(__save_tile(border_reflect_rhombus, to_augment_key))
-
         reflect_border_thickness = 0.33
         if curr.dims[0] * (1 + 2 * reflect_border_thickness) <= max_size:
             border_reflect = curr.add_border_reflect(border_thickness=reflect_border_thickness)
-            # to_augment.append(__save_tile(border_reflect, to_augment_key))
 
             _ = __save_tile(border_reflect, key)
-            # _ = __save_tile(border_reflect.remove_center(), key)
 
         reflect_border_thickness = 0.25
         if curr.dims[0] * (1 + 2 * reflect_border_thickness) <= max_size:
             border_reflect = curr.add_border_reflect(border_thickness=reflect_border_thickness)
-            # to_augment.append(__save_tile(border_reflect, to_augment_key))
             _ = __save_tile(border_reflect, key)
 
             if border_reflect.dims[0] * 2 <= max_size:
-                border_reflect_quadrant = border_reflect.assemble_quadrant_unfold(0, 0)
-                _ = __save_tile(border_reflect_quadrant, key)
-                to_augment.append(__save_tile(border_reflect_quadrant, to_augment_key))
+                border_reflect_unfolded = border_reflect.assemble_quadrant_unfold(0, 0)
+                _ = __save_tile(border_reflect_unfolded, key)
+                to_augment.append(__save_tile(border_reflect_unfolded, to_augment_key))
 
         if curr.dims[0] * 2 <= max_size:
             unfolded = curr.assemble_quadrant_unfold(0, 0)
-            # to_augment.append(__save_tile(unfolded, to_augment_key))
 
             _ = __save_tile(unfolded, key)
             _ = __save_tile(unfolded.get_rhombus(), key)
