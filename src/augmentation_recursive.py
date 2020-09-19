@@ -6,14 +6,21 @@ from src.Tile import Tile
 logger = logging_utils.get_logger(__name__)
 
 
-def enrich_wrapper(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2):
+def enrich(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2):
     temp_key = '{}/temp'.format(key)
-    enrich(__save_tile(tile, temp_key), key, max_fragmentation_depth, max_augmentation_depth)
+    __enrich(__save_tile(tile, temp_key), key, temp_key, max_fragmentation_depth, max_augmentation_depth)
     s3_utils.delete_from_s3(temp_key)
 
 
-def enrich(tile_path, key, max_fragmentation_depth=2, max_augmentation_depth=2):
-    temp_key = '{}/temp'.format(key)
+def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentation_depth=2):
+
+    imgs_in_key = len(s3_utils.get_image_list_from_s3(key))
+    imgs_in_temp_key = len(s3_utils.get_image_list_from_s3(temp_key))
+
+    logger.info('{} images created, {} images are in processing queue'.format(
+        imgs_in_key - imgs_in_temp_key,
+        imgs_in_temp_key
+    ))
 
     tile = __read_tile(tile_path)
 
@@ -26,7 +33,7 @@ def enrich(tile_path, key, max_fragmentation_depth=2, max_augmentation_depth=2):
             __save_tile(tile.get_quadrant(1, 1).rotate().rotate(), temp_key),
         ]
         for fragment in fragments:
-            enrich(fragment, key, max_fragmentation_depth - 1, max_augmentation_depth)
+            __enrich(fragment, key, temp_key, max_fragmentation_depth - 1, max_augmentation_depth)
 
     if max_augmentation_depth >= 1:
         augments = [
@@ -35,7 +42,7 @@ def enrich(tile_path, key, max_fragmentation_depth=2, max_augmentation_depth=2):
             __save_tile(tile.assemble_quadrant_unfold(0, 0).remove_center(), temp_key)
         ]
         for fragment in augments:
-            enrich(fragment, key, max_fragmentation_depth, max_augmentation_depth - 1)
+            __enrich(fragment, key, temp_key, max_fragmentation_depth, max_augmentation_depth - 1)
 
     _ = __save_tile(tile, key)
     _ = __save_tile(tile.add_border_reflect(border_thickness=0.25), key)
