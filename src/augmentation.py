@@ -35,6 +35,8 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
     tile = __read_tile(tile_path)
 
     _ = __save_tile(tile, key)
+    _ = __save_tile(tile.add_border_reflect(0.1), key)
+    _ = __save_tile(tile.add_border_reflect(0.25), key)
 
     if max_overall_depth > 0:
 
