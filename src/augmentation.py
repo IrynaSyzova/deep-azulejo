@@ -123,7 +123,6 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
 
             _ = __save_tile(unfolded, key)
             _ = __save_tile(unfolded.get_rhombus(), key)
-            _ = __save_tile(unfolded.remove_center(), key)
 
         logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
             len(to_fragment), len(to_augment)
