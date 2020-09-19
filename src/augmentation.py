@@ -48,13 +48,10 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
             fragments = [
                 __save_tile(tile.get_rhombus(), temp_key),
                 __save_tile(tile.get_quadrant(0, 0), temp_key),
+                __save_tile(tile.get_quadrant(0, 1), temp_key),
+                __save_tile(tile.get_quadrant(1, 0), temp_key),
+                __save_tile(tile.get_quadrant(1, 1), temp_key)
             ]
-            if __similarity(tile.get_quadrant(0,0), tile.get_quadrant(1, 0).rotate(clockwise=True)) <= MAX_SIMILARITY:
-                fragments += [
-                    __save_tile(tile.get_quadrant(0, 1).rotate(clockwise=False), temp_key),
-                    __save_tile(tile.get_quadrant(1, 0).rotate(clockwise=True), temp_key),
-                    __save_tile(tile.get_quadrant(1, 1).rotate().rotate(), temp_key)
-                ]
             for fragment in fragments:
                 __enrich(fragment, key, temp_key,
                          max_fragmentation_depth - 1,
@@ -65,9 +62,6 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
             augments = [
                 __save_tile(tile.add_border_reflect(border_thickness=0.5), temp_key),
                 __save_tile(tile.assemble_quadrant_unfold(0, 0), temp_key),
-                __save_tile(tile.assemble_quadrant_unfold(0, 1), temp_key),
-                __save_tile(tile.assemble_quadrant_unfold(1, 0), temp_key),
-                __save_tile(tile.assemble_quadrant_unfold(1, 1), temp_key),
             ]
             for fragment in augments:
                 __enrich(fragment, key, temp_key,
