@@ -106,7 +106,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
             # to_augment.append(__save_tile(border_reflect, to_augment_key))
 
             _ = __save_tile(border_reflect, key)
-            _ = __save_tile(border_reflect.remove_center(), key)
+            # _ = __save_tile(border_reflect.remove_center(), key)
 
         reflect_border_thickness = 0.25
         if curr.dims[0] * (1 + 2 * reflect_border_thickness) <= max_size:
@@ -123,6 +123,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
 
             _ = __save_tile(unfolded, key)
             _ = __save_tile(unfolded.get_rhombus(), key)
+            _ = __save_tile(unfolded.remove_center(), key)
 
         logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
             len(to_fragment), len(to_augment)
