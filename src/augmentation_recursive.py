@@ -17,12 +17,15 @@ def enrich(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2):
 
 def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentation_depth=2):
 
+    logger.info('Current fragmentation depth: {}, current augmentation depth: {}'.format(
+        max_fragmentation_depth, max_augmentation_depth
+    ))
+
     imgs_in_key = len(s3_utils.get_image_list_from_s3(key))
     imgs_in_temp_key = len(s3_utils.get_image_list_from_s3(temp_key))
 
-    logger.info('{} images created, {} images are in processing queue'.format(
-        imgs_in_key - imgs_in_temp_key,
-        imgs_in_temp_key
+    logger.info('{} images created'.format(
+        imgs_in_key - imgs_in_temp_key
     ))
 
     tile = __read_tile(tile_path)
@@ -44,11 +47,13 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
     if max_augmentation_depth >= 1:
         augments = [
             __save_tile(tile.add_border_reflect(border_thickness=0.5), temp_key),
-            __save_tile(tile.assemble_quadrant_unfold(0, 0), temp_key),
-            __save_tile(tile.assemble_quadrant_unfold(0, 0).remove_center(), temp_key)
+            __save_tile(tile.assemble_quadrant_unfold(0, 0), temp_key)
         ]
         for fragment in augments:
             __enrich(fragment, key, temp_key, max_fragmentation_depth, max_augmentation_depth - 1)
+
+        new_fragment = __save_tile(tile.assemble_quadrant_unfold(0, 0).remove_center(), temp_key)
+        __enrich(new_fragment, key, temp_key, max_fragmentation_depth-1, max_augmentation_depth - 1)
 
     _ = __save_tile(tile, key)
     _ = __save_tile(tile.add_border_reflect(border_thickness=0.25), key)
