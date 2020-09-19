@@ -3,6 +3,7 @@ import uuid
 from src import logging_utils, s3_utils, image_utils
 from src.Tile import Tile
 
+MIN_SIZE = 64
 MAX_SIZE = 2500
 
 logger = logging_utils.get_logger(__name__)
@@ -25,6 +26,12 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
     ))
 
     tile = __read_tile(tile_path)
+
+    if tile.dims[0] >= MAX_SIZE:
+        max_augmentation_depth = 0
+
+    if tile.dims[0] <= MIN_SIZE:
+        max_fragmentation_depth = 0
 
     if max_fragmentation_depth >= 1:
         fragments = [
