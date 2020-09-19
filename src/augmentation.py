@@ -6,7 +6,7 @@ from src.Tile import Tile
 
 MIN_SIZE = 64
 MAX_SIZE = 2500
-MAX_SIMILARITY = 0.6
+MAX_SIMILARITY = 0.35
 
 logger = logging_utils.get_logger(__name__)
 
@@ -103,6 +103,11 @@ def __read_tile(key):
 
 
 def __similarity(tile1, tile2):
-    img1 = image_utils.increase_contrast(tile1.img)
-    img2 = image_utils.increase_contrast(tile2.img)
+    def prepare(img): return image_utils.prepare(
+        img,
+        resize=True, new_size=(128, 128),
+        apply_contrast=True
+    )
+    img1 = prepare(tile1.img)
+    img2 = prepare(tile2.img)
     return structural_similarity(img1, img2, multichannel=True)
