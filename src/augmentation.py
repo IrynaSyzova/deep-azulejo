@@ -62,15 +62,18 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
                          max_overall_depth - 1)
 
         if max_augmentation_depth > 0:
-            __enrich(__save_tile(tile.add_border_reflect(border_thickness=0.5), temp_key), key, temp_key,
-                     max_fragmentation_depth,
-                     max_augmentation_depth - 1,
-                     max_overall_depth - 1)
-
-            __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0), temp_key), key, temp_key,
-                     max(1, max_fragmentation_depth),
-                     max_augmentation_depth - 1,
-                     max_overall_depth - 1)
+            augments = [
+                __save_tile(tile.add_border_reflect(border_thickness=0.5), temp_key),
+                __save_tile(tile.assemble_quadrant_unfold(0, 0), temp_key),
+                __save_tile(tile.assemble_quadrant_unfold(0, 1), temp_key),
+                __save_tile(tile.assemble_quadrant_unfold(1, 0), temp_key),
+                __save_tile(tile.assemble_quadrant_unfold(1, 1), temp_key),
+            ]
+            for fragment in augments:
+                __enrich(fragment, key, temp_key,
+                         max(1, max_fragmentation_depth),
+                         max_augmentation_depth - 1,
+                         max_overall_depth - 1)
 
             if max_fragmentation_depth > 0:
                 __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0).remove_center(), temp_key), key, temp_key,
