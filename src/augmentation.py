@@ -11,16 +11,15 @@ MAX_SIMILARITY = 0.7
 logger = logging_utils.get_logger(__name__)
 
 
-def enrich(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2, max_overall_depth=4):
+def enrich(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2):
     temp_key = '{}/temp'.format(key)
-    __enrich(__save_tile(tile, temp_key), key, temp_key, max_fragmentation_depth, max_augmentation_depth,
-             max_overall_depth)
+    __enrich(__save_tile(tile, temp_key), key, temp_key, max_fragmentation_depth, max_augmentation_depth)
     s3_utils.delete_from_s3(temp_key)
 
 
-def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentation_depth=2, max_overall_depth=4):
-    logger.info('Fragmentation depth: {}, augmentation depth: {}, overall depth: {}'.format(
-        max_fragmentation_depth, max_augmentation_depth, max_overall_depth
+def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentation_depth=2):
+    logger.info('Fragmentation depth: {}, augmentation depth: {}'.format(
+        max_fragmentation_depth, max_augmentation_depth
     ))
 
     imgs_in_key = len(s3_utils.get_image_list_from_s3(key))
@@ -35,7 +34,7 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
     if tile.dims[0] <= MIN_SIZE:
         max_fragmentation_depth = 0
 
-    if max_fragmentation_depth > 0 and max_overall_depth > 0:
+    if max_fragmentation_depth > 0:
 
         fragments = [
             __save_tile(tile.get_rhombus(), temp_key),
@@ -48,20 +47,18 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
                 __save_tile(tile.get_quadrant(1, 1).rotate().rotate(), temp_key)
             ]
         for fragment in fragments:
-            __enrich(fragment, key, temp_key, max_fragmentation_depth - 1, max_augmentation_depth,
-                     max_overall_depth - 1)
+            __enrich(fragment, key, temp_key, max_fragmentation_depth - 1, max_augmentation_depth)
 
-    if max_augmentation_depth > 0 and max_overall_depth > 0:
+    if max_augmentation_depth > 0:
         __enrich(__save_tile(tile.add_border_reflect(border_thickness=0.5), temp_key), key, temp_key,
-                 max_fragmentation_depth, max_augmentation_depth - 1, max_overall_depth - 1)
+                 max_fragmentation_depth, max_augmentation_depth - 1)
 
         __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0), temp_key), key, temp_key, max_fragmentation_depth + 1,
-                 max_augmentation_depth - 1,
-                 max_overall_depth - 1)
+                 max_augmentation_depth - 1)
 
-        if max_fragmentation_depth > 0 and max_overall_depth > 0:
+        if max_fragmentation_depth > 0:
             __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0).remove_center(), temp_key), key, temp_key,
-                     max_fragmentation_depth - 1, max_augmentation_depth - 1, max_overall_depth - 1)
+                     max_fragmentation_depth - 1, max_augmentation_depth - 1)
 
     _ = __save_tile(tile, key)
     _ = __save_tile(tile.add_border_reflect(border_thickness=0.25), key)
@@ -93,6 +90,7 @@ def __read_tile(key):
     :return: Tile
     """
     return Tile(s3_utils.read_image_from_s3(key))
+
 
 def __similarity(tile1, tile2):
     return structural_similarity(tile1.img, tile2.img, multichannel=True)

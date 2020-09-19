@@ -3,8 +3,7 @@ import cv2
 
 def prepare(img,
             resize=False, new_size=(64, 64),
-            apply_contrast=False, contrast_channels=(0, 1, 2),
-            apply_blur=False, blur_kernel=(3, 3)
+            apply_contrast=False, contrast_channels=(0, 1, 2)
            ):
     """
     Function to prepare the file by cropping, resizing, increasing contrast, and blurring
