@@ -1,11 +1,11 @@
 import uuid
-import cv2
 
 from collections import deque
 from itertools import product
 
 from src import logging_utils, s3_utils
 from src.Tile import Tile
+from src.image_utils import recolour_tile
 
 logger = logging_utils.get_logger(__name__)
 
@@ -145,15 +145,3 @@ def enrich_colour(tile):
     return [recolour_tile(tile, _)
             for _ in channels]
 
-
-def recolour_tile(tile, channels):
-    """
-    Recolours tile by using colour channels[0] for r, channels[1] for g, and channels[2] for b colour channels
-    :param tile: tile to recolour
-    :param channels: colour channels
-    :return: recoloured tile
-    """
-    img = tile.img.copy()
-    for i in (0, 1, 2):
-        img[..., i] = tile.img[..., channels[i]]
-    return Tile(img)
