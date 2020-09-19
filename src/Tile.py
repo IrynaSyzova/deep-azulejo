@@ -301,6 +301,7 @@ class Tile:
         img_full = np.concatenate((img_upper, img_lower), axis=0)
         return Tile(img_full)
 
-    def add_border(self, border_thickness=0.1, border_type=cv2.BORDER_REFLECT):
+    def add_border_reflect(self, border_thickness=0.1):
         n = int(self.dims[0] * border_thickness)
-        return Tile(cv2.copyMakeBorder(self.img, top=n, bottom=n, left=n, right=n, borderType=border_type))
+        return Tile(cv2.copyMakeBorder(self.img, top=n, bottom=n, left=n, right=n, borderType=cv2.BORDER_REFLECT))
+

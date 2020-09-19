@@ -78,12 +78,16 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
             _ = __save_tile(no_center, key)
 
         if curr.dims[0] / 2 >= min_size:
-            for i in range(0, 2):
-                for j in range(0, 2):
-                    quadrant = curr.get_quadrant(i, j)
-                    to_fragment.append(__save_tile(quadrant, to_fragment_key))
-                    to_augment.append(__save_tile(quadrant, to_augment_key))
-                    _ = __save_tile(quadrant, key)
+            quadrants = [
+                curr.get_quadrant(0, 0),
+                curr.get_quadrant(0, 1).rotate(clockwise=False),
+                curr.get_quadrant(1, 0).rotate(clockwise=True),
+                curr.get_quadrant(1, 1).rotate().rotate(),
+            ]
+            for quadrant in quadrants:
+                to_fragment.append(__save_tile(quadrant, to_fragment_key))
+                to_augment.append(__save_tile(quadrant, to_augment_key))
+                _ = __save_tile(quadrant, key)
 
         if curr.dims[0] * 4 <= max_size:
             to_augment.append(__save_tile(curr, to_augment_key))
@@ -97,7 +101,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
 
         reflect_border_thickness = 0.5
         if curr.dims[0] * (1+2*reflect_border_thickness) <= max_size:
-            border_reflect = curr.add_border(border_thickness=reflect_border_thickness, border_type=cv2.BORDER_REFLECT)
+            border_reflect = curr.add_border_reflect(border_thickness=reflect_border_thickness)
             # to_augment.append(__save_tile(border_reflect, to_augment_key))
 
             _ = __save_tile(border_reflect, key)
@@ -105,21 +109,28 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
 
         reflect_border_thickness = 0.33
         if curr.dims[0] * (1 + 2 * reflect_border_thickness) <= max_size:
-            border_reflect = curr.add_border(border_thickness=reflect_border_thickness, border_type=cv2.BORDER_REFLECT)
+            border_reflect = curr.add_border_reflect(border_thickness=reflect_border_thickness)
             # to_augment.append(__save_tile(border_reflect, to_augment_key))
 
             _ = __save_tile(border_reflect, key)
             _ = __save_tile(border_reflect.remove_center(), key)
 
-        if curr.dims[0] * 4 <= max_size:
-            for i in range(0, 2):
-                for j in range(0, 2):
-                    unfolded = curr.assemble_quadrant_unfold(i, j)
-                    # to_augment.append(__save_tile(unfolded, to_augment_key))
+        reflect_border_thickness = 0.25
+        if curr.dims[0] * (1 + 2 * reflect_border_thickness) <= max_size:
+            border_reflect = curr.add_border_reflect(border_thickness=reflect_border_thickness)
+            # to_augment.append(__save_tile(border_reflect, to_augment_key))
+            _ = __save_tile(border_reflect, key)
 
-                    _ = __save_tile(unfolded, key)
-                    _ = __save_tile(unfolded.get_rhombus(), key)
-                    _ = __save_tile(unfolded.remove_center(), key)
+            if border_reflect.dims[0] * 2 <= max_size:
+                _ = __save_tile(border_reflect.assemble_quadrant_unfold(0, 0), key)
+
+        if curr.dims[0] * 2 <= max_size:
+            unfolded = curr.assemble_quadrant_unfold(0, 0)
+            # to_augment.append(__save_tile(unfolded, to_augment_key))
+
+            _ = __save_tile(unfolded, key)
+            _ = __save_tile(unfolded.get_rhombus(), key)
+            _ = __save_tile(unfolded.remove_center(), key)
 
         logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
             len(to_fragment), len(to_augment)
