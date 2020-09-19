@@ -82,7 +82,7 @@ def enrich(tile, key, scale_min=0.25, scale_max=4):
                 to_augment.append(__save_tile(quadrant, to_augment_key))
                 _ = __save_tile(quadrant, key)
 
-        if curr.dims[0] * 4 <= max_size:
+        if curr.dims[0] * 1.5 <= max_size:
             to_augment.append(__save_tile(curr, to_augment_key))
 
         logger.info('{} files in fragmentation queue, {} files in augmentation queue'.format(
