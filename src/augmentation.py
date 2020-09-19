@@ -6,7 +6,7 @@ from src.Tile import Tile
 
 MIN_SIZE = 64
 MAX_SIZE = 2500
-MAX_SIMILARITY = 0.7
+MAX_SIMILARITY = 0.5
 
 logger = logging_utils.get_logger(__name__)
 
@@ -34,44 +34,42 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
 
     tile = __read_tile(tile_path)
 
-    if tile.dims[0] <= MIN_SIZE:
-        max_fragmentation_depth = 0
-
-    if max_fragmentation_depth > 0 and max_overall_depth > 0:
-
-        fragments = [
-            __save_tile(tile.get_rhombus(), temp_key),
-            __save_tile(tile.get_quadrant(0, 0), temp_key),
-        ]
-        if __similarity(tile.get_quadrant(0,0), tile.get_quadrant(1, 0).rotate(clockwise=True)) <= MAX_SIMILARITY:
-            fragments += [
-                __save_tile(tile.get_quadrant(0, 1).rotate(clockwise=False), temp_key),
-                __save_tile(tile.get_quadrant(1, 0).rotate(clockwise=True), temp_key),
-                __save_tile(tile.get_quadrant(1, 1).rotate().rotate(), temp_key)
-            ]
-        for fragment in fragments:
-            __enrich(fragment, key, temp_key, max_fragmentation_depth - 1, max_augmentation_depth,
-                     max_overall_depth - 1)
-
-    if max_augmentation_depth > 0 and max_overall_depth > 0:
-        __enrich(__save_tile(tile.add_border_reflect(border_thickness=0.5), temp_key), key, temp_key,
-                 max_fragmentation_depth, max_augmentation_depth - 1, max_overall_depth - 1)
-
-        __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0), temp_key), key, temp_key, max_fragmentation_depth + 1,
-                 max_augmentation_depth - 1,
-                 max_overall_depth - 1)
-
-        if max_fragmentation_depth > 0 and max_overall_depth > 0:
-            __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0).remove_center(), temp_key), key, temp_key,
-                     max_fragmentation_depth - 1, max_augmentation_depth - 1, max_overall_depth - 1)
-
-            __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0).get_rhombus(), temp_key), key, temp_key,
-                     max_fragmentation_depth - 1, max_augmentation_depth - 1, max_overall_depth - 1)
-
     _ = __save_tile(tile, key)
     _ = __save_tile(tile.add_border_reflect(border_thickness=0.33), key)
 
-    return
+    if max_overall_depth >= 0:
+
+        if tile.dims[0] <= MIN_SIZE:
+            max_fragmentation_depth = 0
+
+        if max_fragmentation_depth > 0:
+
+            fragments = [
+                __save_tile(tile.get_rhombus(), temp_key),
+                __save_tile(tile.get_quadrant(0, 0), temp_key),
+            ]
+            if __similarity(tile.get_quadrant(0,0), tile.get_quadrant(1, 0).rotate(clockwise=True)) <= MAX_SIMILARITY:
+                fragments += [
+                    __save_tile(tile.get_quadrant(0, 1).rotate(clockwise=False), temp_key),
+                    __save_tile(tile.get_quadrant(1, 0).rotate(clockwise=True), temp_key),
+                    __save_tile(tile.get_quadrant(1, 1).rotate().rotate(), temp_key)
+                ]
+            for fragment in fragments:
+                __enrich(fragment, key, temp_key, max_fragmentation_depth - 1, max_augmentation_depth + 1,
+                         max_overall_depth - 1)
+
+        if max_augmentation_depth > 0:
+            __enrich(__save_tile(tile.add_border_reflect(border_thickness=0.5), temp_key), key, temp_key,
+                     max_fragmentation_depth, max_augmentation_depth - 1, max_overall_depth - 1)
+
+            __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0), temp_key), key, temp_key,
+                     max_fragmentation_depth + 1,
+                     max_augmentation_depth - 1,
+                     max_overall_depth - 1)
+
+            if max_fragmentation_depth > 0 and max_overall_depth > 0:
+                __enrich(__save_tile(tile.assemble_quadrant_unfold(0, 0).remove_center(), temp_key), key, temp_key,
+                         max_fragmentation_depth - 1, max_augmentation_depth - 1, max_overall_depth - 1)
 
 
 def __save_tile(tile_save, key):
