@@ -13,8 +13,8 @@ class GANItemListS3(GANItemList):
         return open_image(s3_path, convert_mode=self.convert_mode, after_open=self.after_open)
 
     @classmethod
-    def from_s3(cls, s3_path):
-        return cls(s3_utils.get_image_list_from_s3(s3_path))
+    def from_s3(cls, s3_path, **kwargs):
+        return cls(s3_utils.get_image_list_from_s3(s3_path), **kwargs)
 
 
 def open_image(s3_path, convert_mode='RGB', cls=Image, after_open=None):
