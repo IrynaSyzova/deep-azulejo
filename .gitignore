@@ -3,6 +3,7 @@ dataset_processed/
 dataset_augmented/
 lists/
 temp/
+models/
 *.csv
 *.txt
 *credentials*
