@@ -1,4 +1,5 @@
 import uuid
+import logging
 from skimage.metrics import structural_similarity
 
 from src import logging_utils, s3_utils, image_utils
@@ -9,6 +10,7 @@ MAX_SIZE = 2500
 MAX_SIMILARITY = 0.35
 
 logger = logging_utils.get_logger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def enrich(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2, max_overall_depth=None):

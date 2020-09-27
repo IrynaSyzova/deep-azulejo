@@ -3,7 +3,6 @@ import sys
 
 def get_logger(name):
     logger = logging.getLogger(name)
-    logger.setLevel(logging.INFO)
 
     # create console handler and set level to debug
     ch = logging.StreamHandler(stream=sys.stdout)
