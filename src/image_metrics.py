@@ -1,11 +1,7 @@
 """
 Self-defined functions to measure images according to different properties.
 """
-import cv2
 import numpy as np
-
-from src import image_utils
-from src.Tile import Tile
 
 
 def image_aspect_ratio(img):
@@ -36,7 +32,7 @@ def tile_uniform_contrast(tile, n_pieces=8):
     
     return np.mean([
         min([
-            (tile_piece.img[:, :, k].max() - \
+            (tile_piece.img[:, :, k].max() -
              tile_piece.img[:, :, k].min()) * 1.0 / intensity[k] 
             for tile_piece 
             in tile_list

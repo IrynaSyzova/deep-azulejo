@@ -1,11 +1,9 @@
 import cv2
-import numpy as np
 
 
 def prepare(img,
             resize=False, new_size=(64, 64),
-            apply_contrast=False, contrast_channels=(0, 1, 2),
-            apply_blur=False, blur_kernel=(3, 3)
+            apply_contrast=False, contrast_channels=(0, 1, 2)
            ):
     """
     Function to prepare the file by cropping, resizing, increasing contrast, and blurring
@@ -55,19 +53,10 @@ def increase_contrast(img, channels=(0, 1, 2)):
     :param channels: list of channels to increase contrast in
     :return: altered image
     """
-    equalized = [cv2.equalizeHist(img[:, :, k]) if k in channels else img[:, :, k] for k in (0, 1, 2)]
+    equalized = img.copy()
 
-    return np.array(
-        [
-            [
-                [
-                    equalized[k][i, j]
-                     for k
-                     in (0, 1, 2)
-                ] 
-            for j in range(img.shape[0]) 
-            ]
-            for i in range(img.shape[1])
-        ]
-    )
+    for k in channels:
+        equalized[:, :, k] = cv2.equalizeHist(img[:, :, k])
+
+    return equalized
 

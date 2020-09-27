@@ -4,19 +4,22 @@ import matplotlib.pylab as pylab
 import numpy as np
 import math
 
+from src import s3_utils
 
-def plot_sample_files(file_list, folder='', plot_sample=12, cols=6):
+
+def plot_sample_files_from_list(file_list, folder='', plot_sample=12, cols=6):
     """
-    Plots sample of images read from file_list
+    Plots random sample of images read from file_list
     :param file_list: list of files to print images from
     :param folder: path to files, defaults to current directory
     :param plot_sample: number of images to display
     :param cols: number of columns to arrange images
+    :return: None
     """
     if plot_sample is None:
         plot_sample = len(file_list)
         
-    imgs_to_plot = read_imgs(
+    imgs_to_plot = read_imgs_from_list(
         np.random.choice(file_list, min(plot_sample, len(file_list)), replace=False), 
         folder=folder
     )
@@ -24,7 +27,26 @@ def plot_sample_files(file_list, folder='', plot_sample=12, cols=6):
     plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols)
 
 
-def read_imgs(file_list, folder=''):
+def plot_sample_files_from_s3(key, plot_sample=12, cols=6):
+    """
+    Plots random sample of images from s3 key provided
+    :param key: path in s3
+    :param plot_sample: number of imgs to display
+    :param cols: number of columns to arrange images
+    :return: None
+    """
+    file_list = s3_utils.get_image_list_from_s3(key)
+
+    if plot_sample is None:
+        plot_sample = len(file_list)
+
+    files_to_plot = np.random.choice(file_list, min(plot_sample, len(file_list)), replace=False)
+    imgs_to_plot = [s3_utils.read_image_from_s3(file) for file in files_to_plot]
+
+    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols)
+
+
+def read_imgs_from_list(file_list, folder=''):
     """
     Reads images from file_list
     :param file_list: list of files to read images
@@ -32,7 +54,7 @@ def read_imgs(file_list, folder=''):
     :return: list of images
     """
     return [
-        cv2.imread('{}/{}'.format(folder, img_file))[...,::-1]
+        cv2.cvtColor(cv2.imread('{}/{}'.format(folder, img_file)), cv2.COLOR_BGR2RGB)
         for img_file in
         file_list
     ]
@@ -45,6 +67,7 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
     :param cols: number of columns to arrange images
     :param rows: number of rows to arrange images
     :param plot_sample: number of images to plot
+    :return: None
     """
     if plot_sample is None:
         plot_sample = len(img_list)

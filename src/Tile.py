@@ -1,10 +1,8 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
-import math
-import warnings
 
-from src import io_utils
+from src import io_utils, image_utils
 
 
 class Tile:
@@ -17,20 +15,23 @@ class Tile:
     """
 
     def __init__(self, img):
-        if img.shape[0] != img.shape[1]:
-            raise ValueError('Image must be square to be a tile (image shape is {}x{}).'.format(*img.shape))
+        if np.abs(img.shape[0] - img.shape[1]) == 1:
+            img = image_utils.crop(img)
+        elif img.shape[0] != img.shape[1]:
+            raise ValueError(
+                'Image must be square to be a tile (image shape is {}x{}).'.format(*img.shape)
+            )
         self.img = img
         self.dims = img.shape
 
     # Plotting
-    @classmethod
-    def plot(cls, tile):
+    def plot(self):
         """
         Plots a tile
 
         :param tile: tile to plot
         """
-        plt.imshow(tile.img)
+        plt.imshow(self.img)
         plt.axis('off')
         plt.show()
 
@@ -203,17 +204,17 @@ class Tile:
                         subtiles[0].img,
                         subtiles[2].img
                     ),
-                    axis=0
+                    axis=1
                 ),
                 np.concatenate(
                     (
                         subtiles[6].img,
                         subtiles[8].img
                     ),
-                    axis=0
+                    axis=1
                 )
             ),
-            axis=1
+            axis=0
         )
 
         return Tile(result)
@@ -298,3 +299,23 @@ class Tile:
         img_full = np.concatenate((img_upper, img_lower), axis=0)
         return Tile(img_full)
 
+    def add_border_reflect(self, border_thickness=0.1):
+        """
+        Adds cv2.BORDER_REFLECT border of border_thickness thickness
+        :param border_thickness: thickness of border
+        :return: tile with border
+        """
+        n = int(self.dims[0] * border_thickness)
+        return Tile(cv2.copyMakeBorder(self.img, top=n, bottom=n, left=n, right=n, borderType=cv2.BORDER_REFLECT))
+
+    def recolour(self, channels):
+        """
+        Recolours tile by using colour channels[0] for r, channels[1] for g, and channels[2] for b colour channels
+        :param tile: tile to recolour
+        :param channels: colour channels
+        :return: recoloured tile
+        """
+        img = self.img.copy()
+        for i in (0, 1, 2):
+            img[..., i] = self.img[..., channels[i]]
+        return Tile(img)
