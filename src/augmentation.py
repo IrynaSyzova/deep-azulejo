@@ -20,7 +20,7 @@ def enrich(tile, key, max_fragmentation_depth=2, max_augmentation_depth=2, max_o
     s3_utils.delete_from_s3(temp_key)
 
 
-def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentation_depth=2, max_overall_depth=4):
+def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentation_depth=2, max_overall_depth=5):
     logger.debug('Fragmentation depth: {}, augmentation depth: {}, overall depth: {}'.format(
         max_fragmentation_depth, max_augmentation_depth, max_overall_depth
     ))
@@ -50,6 +50,7 @@ def __enrich(tile_path, key, temp_key, max_fragmentation_depth=2, max_augmentati
                 __save_tile(tile.get_quadrant(0, 0), temp_key)
             ]
             if __similarity(tile.get_quadrant(0, 0), tile.get_quadrant(0, 1)) < MAX_SIMILARITY:
+                # if fragments is not similar, we want all of them, otherwise, 1 is fine
                 fragments += [
                     __save_tile(tile.get_quadrant(0, 1), temp_key),
                     __save_tile(tile.get_quadrant(1, 0), temp_key),
