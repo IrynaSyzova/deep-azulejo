@@ -29,4 +29,7 @@ class TileDataset(Dataset):
 
         images = [Image.fromarray(s3_utils.get_image_list_from_s3(key)) for key in self.pics[idx]]
 
+        if self.transform:
+            images = self.transform(images)
+
         return images
