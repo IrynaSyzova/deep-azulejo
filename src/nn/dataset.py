@@ -31,13 +31,3 @@ class TileDataset(Dataset):
         images = [s3_utils.get_image_list_from_s3(key) for key in self.pics[idx]]
 
         return images
-
-
-class Recolour(object):
-    def __call__(self, img):
-        img_result = img.copy()
-        channels = (0, 1, 2)
-        channels_permuted = np.random.choise(channels, size=3, replace=True)
-        for i in range(len(channels)):
-            img_result[..., channels[i]] = img[..., channels_permuted[i]]
-        return img_result
