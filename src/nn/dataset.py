@@ -24,12 +24,9 @@ class TileDataset(Dataset):
         return len(self.pics)
 
     def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        images = [Image.fromarray(s3_utils.read_image_from_s3(key)) for key in self.pics[idx]]
+        image = Image.fromarray(s3_utils.read_image_from_s3(self.pics[idx]))
 
         if self.transform:
-            images = self.transform(images)
+            image = self.transform(image)
 
-        return images
+        return image
