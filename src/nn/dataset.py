@@ -1,8 +1,7 @@
 from __future__ import print_function, division
 import torch
-import numpy as np
 from torch.utils.data import Dataset, DataLoader
-from torchvision import transforms, utils
+from PIL import Image
 
 from src import s3_utils
 
@@ -28,6 +27,6 @@ class TileDataset(Dataset):
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        images = [s3_utils.get_image_list_from_s3(key) for key in self.pics[idx]]
+        images = [Image.fromarray(s3_utils.get_image_list_from_s3(key)) for key in self.pics[idx]]
 
         return images
