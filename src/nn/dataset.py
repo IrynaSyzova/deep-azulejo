@@ -36,7 +36,8 @@ class TileDataset(Dataset):
 class Recolour(object):
     def __call__(self, img):
         img_result = img.copy()
-        channels = np.random.choise([0, 1, 2], size=3, replace=True)
-        for i in (0, 1, 2):
-            img_result[..., i] = img[..., channels[i]]
+        channels = (0, 1, 2)
+        channels_permuted = np.random.choise(channels, size=3, replace=True)
+        for i in range(len(channels)):
+            img_result[..., channels[i]] = img[..., channels_permuted[i]]
         return img_result
