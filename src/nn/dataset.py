@@ -1,5 +1,4 @@
 from __future__ import print_function, division
-import torch
 from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 
@@ -13,9 +12,9 @@ warnings.filterwarnings("ignore")
 class TileDataset(Dataset):
     def __init__(self, s3_key, transform):
         """
-
         :param root_dir: directory with the images
         """
+        super(TileDataset, self).__init__()
         self.key = s3_key
         self.pics = s3_utils.get_image_list_from_s3(s3_key)
         self.transform = transform
