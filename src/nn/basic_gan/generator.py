@@ -46,7 +46,7 @@ class Generator(nn.Module):
         :param kernel_size: filter size of the convolution
         :param stride: stride of the convolution
         """
-        nn.Sequential(
+        return nn.Sequential(
             nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride),
             nn.Tanh()
         )
@@ -57,7 +57,7 @@ class Generator(nn.Module):
         :param noise: input noise
         """
         x = noise.view(len(noise), self.z_dim, 1, 1)
-        return self.gen(x)
+        return self.generator(x)
 
     @staticmethod
     def get_noise(n_samples, z_dim, device='cpu'):

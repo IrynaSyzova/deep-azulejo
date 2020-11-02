@@ -37,7 +37,7 @@ def train(dataloader, noise_dimention, n_epochs,
     step = 0
 
     for epoch in range(n_epochs):
-        for real_imgs, _ in tqdm(dataloader):
+        for real_imgs in tqdm(dataloader):
             batch_size = len(real_imgs)
             real_imgs = real_imgs.to(device)
 
