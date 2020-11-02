@@ -46,7 +46,7 @@ def train(dataloader, noise_dimention, n_epochs,
 
                 fake_imgs = generator(generator.get_noise(batch_size, noise_dimention, device=device))
 
-                critic_loss = critic.loss(fake_imgs, real_imgs, gradient_penalty_weight)
+                critic_loss = critic.loss(fake_imgs, real_imgs, gradient_penalty_weight, device=device)
 
                 mean_critic_loss += critic_loss.item() / critic_repeats
 
