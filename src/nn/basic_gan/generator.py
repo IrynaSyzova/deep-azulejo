@@ -11,7 +11,7 @@ class Generator(nn.Module):
         :param z_dim: input noise dimension
         :param channels: number of channels in the images
         """
-        super(Generator, self).__init__()
+        super().__init__()
         self.z_dim = z_dim
         self.channels = channels
 
