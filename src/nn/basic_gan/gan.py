@@ -13,7 +13,8 @@ def init_weights(layer, std=0.01):
     :param layer: layer for which we initiate the weights
     :param std: weight's std
     """
-    nn.init.normal_(layer.weight, 0.0, std)
+    if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.ConvTranspose2d) or isinstance(layer, nn.BatchNorm2d):
+        nn.init.normal_(layer.weight, 0.0, std)
     if isinstance(layer, nn.BatchNorm2d):
         nn.init.constant(layer.bias, 0)
 
@@ -36,7 +37,7 @@ def train(dataloader, noise_dimention, n_epochs,
     step = 0
 
     for epoch in range(n_epochs):
-        for real_imgs, _ in tqdm(dataloader):
+        for real_imgs in tqdm(dataloader):
             batch_size = len(real_imgs)
             real_imgs = real_imgs.to(device)
 

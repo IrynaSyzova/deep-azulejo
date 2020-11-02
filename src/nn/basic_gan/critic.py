@@ -8,7 +8,7 @@ class Critic(nn.Module):
         Critic class
         :param channels: number of channels in the images
         """
-        super(Critic, self).__init__()
+        super().__init__()
         self.critic = nn.Sequential(
             self._make_block(channels, 64),
             self._make_block(64, 128),
@@ -29,7 +29,7 @@ class Critic(nn.Module):
         return nn.Sequential(
             nn.Conv2d(input_channels, output_channels, kernel_size, stride),
             nn.BatchNorm2d(output_channels),
-            nn.LeakyReLu(alpha)
+            nn.LeakyReLU(alpha)
         )
 
     @staticmethod
