@@ -22,7 +22,7 @@ def init_weights(layer, std=0.01):
 def train(dataloader, noise_dimention, n_epochs,
           device='cpu',
           critic_repeats=5, lr=0.0001, betas=(0.9, 0.999), gradient_penalty_weight=10,
-          display_step=1000):
+          display_step=10000):
     generator = Generator(noise_dimention).to(device)
     critic = Critic().to(device)
 

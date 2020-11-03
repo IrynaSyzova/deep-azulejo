@@ -12,7 +12,8 @@ class Critic(nn.Module):
         self.critic = nn.Sequential(
             self._make_block(channels, hidden_dim),
             self._make_block(hidden_dim, hidden_dim*2),
-            self._make_final_block(hidden_dim*2, 1)
+            self._make_block(hidden_dim, hidden_dim*4),
+            self._make_final_block(hidden_dim*4, 1)
         )
 
     @staticmethod
@@ -32,7 +33,7 @@ class Critic(nn.Module):
         )
 
     @staticmethod
-    def _make_final_block(input_channels, output_channels, kernel_size=5, stride=1):
+    def _make_final_block(input_channels, output_channels, kernel_size=4, stride=2):
         """
         Final block for Critic, which is just a convolution
         :param input_channels: input channels size
