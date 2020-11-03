@@ -62,7 +62,6 @@ class Critic(nn.Module):
         critic_fake_pred = self.critic(fake_imgs)
         critic_real_pred = self.critic(real_imgs)
         epsilon = torch.rand(len(real_imgs), 1, 1, 1, device=device, requires_grad=True)
-        print(real_imgs.shape, fake_imgs.shape, epsilon.shape)
         gradient = self.get_gradient(fake_imgs, real_imgs, epsilon)
         gradient_penalty = self.get_gradient_penalty(gradient)
         return critic_fake_pred.mean() - critic_real_pred.mean() + gradient_penalty * penalty_weight
