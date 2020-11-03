@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
+import numpy as np
 
 from src.nn.basic_gan.generator import Generator
 from src.nn.basic_gan.critic import Critic
@@ -22,8 +23,7 @@ def init_weights(layer, std=0.01):
 
 def train(dataloader, noise_dimention, n_epochs,
           device='cpu',
-          critic_repeats=5, lr=0.0001, betas=(0.9, 0.999), gradient_penalty_weight=10,
-          display_step=10000):
+          critic_repeats=5, lr=0.0001, betas=(0.9, 0.999), gradient_penalty_weight=10):
     generator = Generator(noise_dimention).to(device)
     critic = Critic().to(device)
 
@@ -34,8 +34,6 @@ def train(dataloader, noise_dimention, n_epochs,
     critic_optimiser = torch.optim.Adam(critic.parameters(), lr=lr, betas=betas)
 
     generator_losses, critic_losses = [], []
-
-    step = 0
 
     for epoch in range(n_epochs):
         for real_imgs in tqdm(dataloader):
@@ -68,30 +66,20 @@ def train(dataloader, noise_dimention, n_epochs,
             generator_optimiser.step()
             generator_losses.append(generator_loss.item())
 
-            if step % display_step == 0:
-                # Visualisation
+        print("Step {step}: Generator loss: {gen_mean}, critic loss: {crit_mean}".format(
+            gen_mean=np.mean(generator_losses),
+            crit_mean=np.mean(critic_losses)
+        ))
+        plot_batch(fake_imgs, device=device, caption='Generated images')
+        plot_batch(real_imgs, device=device, caption='Real images')
 
-                print("Step {step}: Generator loss: {gen_mean}, critic loss: {crit_mean}".format(
-                    step=step,
-                    gen_mean=sum(generator_losses[-display_step:]) / display_step,
-                    crit_mean=sum(critic_losses[-display_step:]) / display_step
-                ))
-                plot_batch(fake_imgs, device=device, caption='Generated images')
-                plot_batch(real_imgs, device=device, caption='Real images')
-
-                step_bins = 100
-                num_examples = (len(generator_losses) // step_bins) * step_bins
-                plt.plot(
-                    range(num_examples // step_bins),
-                    torch.Tensor(generator_losses[:num_examples]).view(-1, step_bins).mean(1),
-                    label="Generator Loss"
-                )
-                plt.plot(
-                    range(num_examples // step_bins),
-                    torch.Tensor(critic_losses[:num_examples]).view(-1, step_bins).mean(1),
-                    label="Critic Loss"
-                )
-                plt.legend()
-                plt.show()
-
-        step += 1
+        plt.plot(
+            torch.Tensor(generator_losses).view(-1, len(generator_losses)).mean(1),
+            label="Generator Loss"
+        )
+        plt.plot(
+            torch.Tensor(critic_losses).view(-1, len(critic_losses)).mean(1),
+            label="Critic Loss"
+        )
+        plt.legend()
+        plt.show()
