@@ -12,7 +12,7 @@ class Critic(nn.Module):
         self.critic = nn.Sequential(
             self._make_block(channels, hidden_dim, kernel_size=3, stride=1),
             self._make_block(hidden_dim, hidden_dim*2, kernel_size=3, stride=2),
-            self._make_block(hidden_dim, hidden_dim *4, kernel_size=3, stride=2),
+            self._make_block(hidden_dim*2, hidden_dim *4, kernel_size=3, stride=2),
             self._make_final_block(hidden_dim*4, 1, kernel_size=4, stride=2)
         )
 
