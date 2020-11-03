@@ -4,7 +4,7 @@ from scipy.stats import truncnorm
 
 
 class Generator(nn.Module):
-    def __init__(self, z_dim=100, channels=3):
+    def __init__(self, z_dim=100, channels=3, hidden_dim=64):
         """
         Generator class
 
@@ -16,10 +16,9 @@ class Generator(nn.Module):
         self.channels = channels
 
         self.generator = nn.Sequential(
-            self._make_block(z_dim, 256),
-            self._make_block(256, 128),
-            self._make_block(128, 64),
-            self._make_final_block(64, channels)
+            self._make_block(z_dim, hidden_dim*4),
+            self._make_block(hidden_dim*4, hidden_dim*2),
+            self._make_final_block(hidden_dim*2, channels)
         )
 
     @staticmethod

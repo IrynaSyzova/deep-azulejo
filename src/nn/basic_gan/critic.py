@@ -3,17 +3,16 @@ from torch import nn
 
 
 class Critic(nn.Module):
-    def __init__(self, channels=3):
+    def __init__(self, channels=3, hidden_dim=64):
         """
         Critic class
         :param channels: number of channels in the images
         """
         super().__init__()
         self.critic = nn.Sequential(
-            self._make_block(channels, 64),
-            self._make_block(64, 128),
-            self._make_block(128, 256),
-            self._make_final_block(256, 1)
+            self._make_block(channels, hidden_dim),
+            self._make_block(hidden_dim, hidden_dim*2),
+            self._make_final_block(hidden_dim*2, 1)
         )
 
     @staticmethod
@@ -63,6 +62,7 @@ class Critic(nn.Module):
         critic_fake_pred = self.critic(fake_imgs)
         critic_real_pred = self.critic(real_imgs)
         epsilon = torch.rand(len(real_imgs), 1, 1, 1, device=device, requires_grad=True)
+        print(real_imgs.shape, fake_imgs.shape, epsilon.shape)
         gradient = self.get_gradient(fake_imgs, real_imgs, epsilon)
         gradient_penalty = self.get_gradient_penalty(gradient)
         return critic_fake_pred.mean() - critic_real_pred.mean() + gradient_penalty * penalty_weight
