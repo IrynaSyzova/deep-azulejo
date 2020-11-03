@@ -16,7 +16,7 @@ class Critic(nn.Module):
         )
 
     @staticmethod
-    def _make_block(input_channels, output_channels, kernel_size=5, stride=1, alpha=0.1):
+    def _make_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.1):
         """
         Building block for Critic, which is convolution-batch norm-leaky relu combination
         :param input_channels: input channels size

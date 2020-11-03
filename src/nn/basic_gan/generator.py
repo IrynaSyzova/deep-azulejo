@@ -16,9 +16,9 @@ class Generator(nn.Module):
         self.channels = channels
 
         self.generator = nn.Sequential(
-            self._make_block(z_dim, hidden_dim*4),
-            self._make_block(hidden_dim*4, hidden_dim*2),
-            self._make_final_block(hidden_dim*2, channels)
+            self._make_block(z_dim, hidden_dim*4, kernel_size=3, stride=2),
+            self._make_block(hidden_dim*4, hidden_dim*2, kernel_size=4, stride=1),
+            self._make_final_block(hidden_dim*2, channels, kernel_size=4, stride=2  )
         )
 
     @staticmethod
