@@ -9,7 +9,7 @@ def plot_batch(real_batch, plot_size=32, caption=None, device='cpu'):
     plt.imshow(
         np.transpose(
             vutils.make_grid(
-                real_batch[:plot_size].to(device)[:64], padding=2, normalize=True
+                real_batch[:plot_size].detach().cpu().clamp_(0, 1)[:64], padding=2, normalize=True
             ).cpu(), (1, 2, 0)
         )
     )
