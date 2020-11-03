@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 from tqdm.auto import tqdm
+import matplotlib.pyplot as plt
 
 from src.nn.basic_gan.generator import Generator
 from src.nn.basic_gan.critic import Critic
@@ -77,5 +78,20 @@ def train(dataloader, noise_dimention, n_epochs,
                 ))
                 plot_batch(fake_imgs, device=device, caption='Generated images')
                 plot_batch(real_imgs, device=device, caption='Real images')
+
+                step_bins = 100
+                num_examples = (len(generator_losses) // step_bins) * step_bins
+                plt.plot(
+                    range(num_examples // step_bins),
+                    torch.Tensor(generator_losses[:num_examples]).view(-1, step_bins).mean(1),
+                    label="Generator Loss"
+                )
+                plt.plot(
+                    range(num_examples // step_bins),
+                    torch.Tensor(critic_losses[:num_examples]).view(-1, step_bins).mean(1),
+                    label="Critic Loss"
+                )
+                plt.legend()
+                plt.show()
 
         step += 1
