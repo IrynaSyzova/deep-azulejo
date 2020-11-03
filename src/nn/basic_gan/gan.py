@@ -59,7 +59,7 @@ def train(dataloader, noise_dimention, n_epochs,
 
             generator_optimiser.zero_grad()
 
-            fake_imgs = generator(generator.get_noise(batch_size, noise_dimention))
+            fake_imgs = generator(generator.get_noise(batch_size, noise_dimention, device=device))
             fake_pred = critic(fake_imgs)
 
             generator_loss = generator.loss(fake_pred)
