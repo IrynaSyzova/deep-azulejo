@@ -8,7 +8,7 @@ class Critic(nn.Module):
         Critic class
         :param channels: number of channels in the images
         """
-        super().__init__()
+        super(Critic, self).__init__()
         self.critic = nn.Sequential(
             self._make_block(channels, hidden_dim, kernel_size=3, stride=1),
             self._make_block(hidden_dim, hidden_dim*2, kernel_size=3, stride=2),
