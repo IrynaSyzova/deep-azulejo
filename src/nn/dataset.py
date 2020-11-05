@@ -15,7 +15,7 @@ class TileDataset(Dataset):
         """
         :param root_dir: directory with the images
         """
-        super(TileDataset, self).__init__()
+        # super(TileDataset, self).__init__()
         self.key = s3_key
         self.pics = s3_utils.get_image_list_from_s3(s3_key)
         self.transform = transform
