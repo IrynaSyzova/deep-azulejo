@@ -66,7 +66,8 @@ def train(dataloader, noise_dimention, n_epochs,
             generator_optimiser.step()
             generator_losses.append(generator_loss.item())
 
-        print("Step {step}: Generator loss: {gen_mean}, critic loss: {crit_mean}".format(
+        print("Epoch {epoch}: Generator loss: {gen_mean}, critic loss: {crit_mean}".format(
+            epoch=epoch,
             gen_mean=np.mean(generator_losses),
             crit_mean=np.mean(critic_losses)
         ))
