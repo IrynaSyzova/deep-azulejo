@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 from torch.utils.data import Dataset
 from torch.utils.data.dataloader import default_collate
+from tenacity import retry, wait_fixed, stop_after_attempt
 
 from src import s3_utils
 from src.logging_utils import get_logger
@@ -23,15 +24,19 @@ class TileDataset(Dataset):
 
     def __getitem__(self, idx):
         try:
-            image = s3_utils.read_image_from_s3(self.pics[idx], as_array=False)
-
-            if self.transform:
-                image = self.transform(image)
-
-            return image
+            return self.__get_image(idx)
         except Exception as e:
             logger.warning('Problem with __getitem__: {}'.format(e))
             return None
+
+    @retry(wait=wait_fixed(0.02), stop=stop_after_attempt(3))
+    def __get_image(self, idx):
+        image = s3_utils.read_image_from_s3(self.pics[idx], as_array=False)
+
+        if self.transform:
+            image = self.transform(image)
+
+        return image
 
 
 def collate_fn(batch):
