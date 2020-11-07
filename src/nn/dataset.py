@@ -1,6 +1,5 @@
 from __future__ import print_function, division
 from torch.utils.data import Dataset, DataLoader
-from PIL import Image
 
 from src import s3_utils
 
@@ -20,7 +19,7 @@ class TileDataset(Dataset):
 
     def __getitem__(self, idx):
         try:
-            image = Image.fromarray(s3_utils.read_image_from_s3(self.pics[idx]))
+            image = s3_utils.read_image_from_s3(self.pics[idx], as_array=False)
 
             if self.transform:
                 image = self.transform(image)
