@@ -93,13 +93,20 @@ def train(data_loader, noise_dimension, n_epochs,
         plot_batch(fake_imgs, device=device, caption='Generated images')
         plot_batch(real_imgs, device=device, caption='Real images')
 
+        if epoch <= 10:
+            marker = '.'
+        else:
+            marker = ','
+
         plt.plot(
             torch.Tensor(generator_losses).view(-1, len(generator_losses)).mean(1),
-            label="Generator Loss"
+            label="Generator Loss",
+            marker=marker
         )
         plt.plot(
             torch.Tensor(critic_losses).view(-1, len(critic_losses)).mean(1),
-            label="Critic Loss"
+            label="Critic Loss",
+            marker=marker
         )
         plt.legend()
         plt.show()
