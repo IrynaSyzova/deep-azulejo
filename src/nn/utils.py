@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 import torchvision.utils as vutils
 
 
@@ -17,3 +18,17 @@ def plot_batch(real_batch, plot_size=32, caption=None, device='cpu'):
         plt.title(caption)
 
     plt.show()
+
+
+def new_dim_conv2d(h_in, stride, kernel_size):
+    dilation=1
+    padding = 0
+    out_padding=0
+    return (h_in-1)*stride - 2*padding + dilation*(kernel_size-1)+out_padding+1
+
+
+def new_dim_conv2d_transpose(h_in, stride, kernel_size):
+    dilation=1
+    padding = 0
+    out_padding=0
+    return math.floor((h_in + 2*padding +dilation*(kernel_size-1)-1)/stride) + 1
