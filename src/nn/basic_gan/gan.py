@@ -3,6 +3,8 @@ from torch import nn
 from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
+from pathlib import Path
+from datetime import datetime
 
 from src.nn.basic_gan.generator import Generator
 from src.nn.basic_gan.critic import Critic
@@ -21,10 +23,27 @@ def init_weights(layer, std=0.01):
         nn.init.constant_(layer.bias, 0)
 
 
-def train(dataloader, noise_dimention, n_epochs,
+def save_checkpoint(net, optimiser, path, epoch, loss):
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': net.state_dict(),
+        'optimizer_state_dict': optimiser.state_dict(),
+        'loss': loss,
+    }, path)
+
+
+def train(data_loader, noise_dimension, n_epochs,
           device='cpu',
+          checkpoint_folder=None,
           critic_repeats=5, lr=0.0001, betas=(0.9, 0.999), gradient_penalty_weight=10):
-    generator = Generator(noise_dimention).to(device)
+    if checkpoint_folder is None:
+        checkpoint_folder = "models/basic_gan_{}".format(str(datetime.today().date()))
+        Path(checkpoint_folder).mkdir(parents=True, exist_ok=True)
+
+    generator_checkpoint_path = '{}/generator.pt'.format(checkpoint_folder)
+    critic_checkpoint_path = '{}/critic.pt'.format(checkpoint_folder)
+
+    generator = Generator(noise_dimension).to(device)
     critic = Critic().to(device)
 
     generator.apply(init_weights)
@@ -36,7 +55,7 @@ def train(dataloader, noise_dimention, n_epochs,
     generator_losses, critic_losses = [], []
 
     for epoch in range(n_epochs):
-        for real_imgs in tqdm(dataloader):
+        for real_imgs in tqdm(data_loader):
             batch_size = len(real_imgs)
             real_imgs = real_imgs.to(device)
 
@@ -44,7 +63,7 @@ def train(dataloader, noise_dimention, n_epochs,
             for _ in range(critic_repeats):
                 critic_optimiser.zero_grad()
 
-                fake_imgs = generator(generator.get_noise(batch_size, noise_dimention, device=device))
+                fake_imgs = generator(generator.get_noise(batch_size, noise_dimension, device=device))
 
                 critic_loss = critic.loss(fake_imgs, real_imgs, gradient_penalty_weight, device=device)
 
@@ -58,7 +77,7 @@ def train(dataloader, noise_dimention, n_epochs,
 
             generator_optimiser.zero_grad()
 
-            fake_imgs = generator(generator.get_noise(batch_size, noise_dimention, device=device))
+            fake_imgs = generator(generator.get_noise(batch_size, noise_dimension, device=device))
             fake_pred = critic(fake_imgs)
 
             generator_loss = generator.loss(fake_pred)
@@ -84,3 +103,6 @@ def train(dataloader, noise_dimention, n_epochs,
         )
         plt.legend()
         plt.show()
+
+        save_checkpoint(generator, generator_optimiser, generator_checkpoint_path, epoch, generator_loss)
+        save_checkpoint(critic, critic_optimiser, critic_checkpoint_path, epoch, critic_loss)
