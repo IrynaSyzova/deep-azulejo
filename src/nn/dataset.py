@@ -26,7 +26,7 @@ class TileDataset(Dataset):
         try:
             return self.__get_image(idx)
         except Exception as e:
-            logger.warning('Problem with __getitem__: {}'.format(e))
+            logger.warning('Problem with __getitem__ for item {}: {}'.format(self.pics[idx], e))
             return None
 
     @retry(wait=wait_fixed(0.02), stop=stop_after_attempt(3))
