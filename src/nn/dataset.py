@@ -2,6 +2,9 @@ from __future__ import print_function, division
 from torch.utils.data import Dataset, DataLoader
 
 from src import s3_utils
+from src.logging_utils import get_logger
+
+logger = get_logger('dataset')
 
 
 class TileDataset(Dataset):
@@ -26,5 +29,4 @@ class TileDataset(Dataset):
 
             return image
         except Exception as e:
-            print('Problem with __getitem__')
-            print(e)
+            logger.warning('Problem with __getitem__: {}'.format(e))
