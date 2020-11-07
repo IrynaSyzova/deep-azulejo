@@ -18,7 +18,7 @@ def init_weights(layer, std=0.01):
     if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.ConvTranspose2d) or isinstance(layer, nn.BatchNorm2d):
         nn.init.normal_(layer.weight, 0.0, std)
     if isinstance(layer, nn.BatchNorm2d):
-        nn.init.constant(layer.bias, 0)
+        nn.init.constant_(layer.bias, 0)
 
 
 def train(dataloader, noise_dimention, n_epochs,
