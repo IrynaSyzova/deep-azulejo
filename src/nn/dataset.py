@@ -1,5 +1,5 @@
 from __future__ import print_function, division
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import Dataset
 
 from src import s3_utils
 from src.logging_utils import get_logger
