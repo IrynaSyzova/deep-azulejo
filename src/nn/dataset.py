@@ -1,5 +1,6 @@
 from __future__ import print_function, division
 from torch.utils.data import Dataset
+from torch.utils.data.dataloader import default_collate
 
 from src import s3_utils
 from src.logging_utils import get_logger
@@ -30,3 +31,9 @@ class TileDataset(Dataset):
             return image
         except Exception as e:
             logger.warning('Problem with __getitem__: {}'.format(e))
+            return None
+
+
+def collate_fn(batch):
+    batch = [img for img in batch if img is not None]
+    return default_collate(list(batch))
