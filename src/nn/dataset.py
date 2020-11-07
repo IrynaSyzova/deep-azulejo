@@ -35,5 +35,7 @@ class TileDataset(Dataset):
 
 
 def collate_fn(batch):
-    batch = [img for img in batch if img is not None]
-    return default_collate(list(batch))
+    new_batch = [img for img in batch if img is not None]
+    if len(new_batch) < len(batch):
+        logger.warning('Collate function filtered {} images'.format(len(batch) - len(new_batch)))
+    return default_collate(list(new_batch))
