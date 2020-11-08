@@ -1,10 +1,11 @@
 import torch
 from torch import nn
-from tqdm.auto import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+
+from fastprogress.fastprogress import master_bar, progress_bar
 
 from src.nn.basic_gan.generator import Generator
 from src.nn.basic_gan.critic import Critic
@@ -32,6 +33,20 @@ def save_checkpoint(net, optimiser, path, epoch, loss):
     }, path)
 
 
+def update_progress_plot(epoch, epochs, generator_losses, critic_losses, master_bar):
+    x = range(1, epoch + 1)
+    generator_loss = torch.Tensor(generator_losses).view(-1, len(generator_losses))
+    critic_loss = torch.Tensor(critic_losses).view(-1, len(critic_losses))
+    y = np.concatenate((generator_loss, critic_loss))
+    graphs = [[x, generator_loss], [x, critic_loss]]
+    x_margin = 0.2
+    y_margin = 0.05
+    x_bounds = [1 - x_margin, epochs + x_margin]
+    y_bounds = [np.min(y) - y_margin, np.max(y) + y_margin]
+
+    master_bar.update_graph(graphs, x_bounds, y_bounds)
+
+
 def train(data_loader, noise_dimension, n_epochs,
           device='cpu',
           checkpoint_folder=None,
@@ -39,9 +54,6 @@ def train(data_loader, noise_dimension, n_epochs,
     if checkpoint_folder is None:
         checkpoint_folder = "models/basic_gan_{}".format(str(datetime.today().date()))
         Path(checkpoint_folder).mkdir(parents=True, exist_ok=True)
-
-    generator_checkpoint_path = '{}/generator.pt'.format(checkpoint_folder)
-    critic_checkpoint_path = '{}/critic.pt'.format(checkpoint_folder)
 
     generator = Generator(noise_dimension).to(device)
     critic = Critic().to(device)
@@ -54,8 +66,10 @@ def train(data_loader, noise_dimension, n_epochs,
 
     generator_losses, critic_losses = [], []
 
-    for epoch in range(n_epochs):
-        for real_imgs in tqdm(data_loader):
+    master_progress_bar = master_bar(range(n_epochs))
+    master_progress_bar.names = ['generator', 'critic']
+    for epoch in master_progress_bar:
+        for real_imgs in progress_bar(data_loader, parent = master_progress_bar):
             batch_size = len(real_imgs)
             real_imgs = real_imgs.to(device)
 
@@ -90,26 +104,14 @@ def train(data_loader, noise_dimension, n_epochs,
             gen_mean=np.mean(generator_losses),
             crit_mean=np.mean(critic_losses)
         ))
+
         plot_batch(fake_imgs, device=device, caption='Generated images')
         plot_batch(real_imgs, device=device, caption='Real images')
 
-        if epoch <= 10:
-            marker = '.'
-        else:
-            marker = ','
+        update_progress_plot(epoch, n_epochs, generator_losses, critic_losses, master_progress_bar)
 
-        plt.plot(
-            torch.Tensor(generator_losses).view(-1, len(generator_losses)).mean(1),
-            label="Generator Loss",
-            marker=marker
-        )
-        plt.plot(
-            torch.Tensor(critic_losses).view(-1, len(critic_losses)).mean(1),
-            label="Critic Loss",
-            marker=marker
-        )
-        plt.legend()
-        plt.show()
+        generator_checkpoint_path = '{}/generator_{}.pt'.format(checkpoint_folder, epoch)
+        critic_checkpoint_path = '{}/critic_{}.pt'.format(checkpoint_folder, epoch)
 
-        save_checkpoint(generator, generator_optimiser, generator_checkpoint_path, epoch, generator_loss)
-        save_checkpoint(critic, critic_optimiser, critic_checkpoint_path, epoch, critic_loss)
+        save_checkpoint(generator, generator_optimiser, generator_checkpoint_path, epoch, np.mean(generator_losses))
+        save_checkpoint(critic, critic_optimiser, critic_checkpoint_path, epoch, np.mean(critic_losses))
