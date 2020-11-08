@@ -42,7 +42,7 @@ class Critic(nn.Module):
         :param stride: stride of the convolution
         """
         return nn.Sequential(
-            nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
+            nn.utils.spectral_norm(nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding))
         )
 
     def forward(self, image):
