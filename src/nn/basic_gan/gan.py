@@ -83,9 +83,9 @@ class GAN:
 
     @staticmethod
     def update_progress_plot(epoch, epochs, generator_losses, critic_losses, master_bar):
-        x = range(1, epoch + 1)
         generator_loss = torch.Tensor(generator_losses).view(-1, len(generator_losses))
         critic_loss = torch.Tensor(critic_losses).view(-1, len(critic_losses))
+        x = np.range(1, len(generator_loss)+1)
         y = np.concatenate((generator_loss, critic_loss))
         graphs = [[x, generator_loss], [x, critic_loss]]
         x_margin = 0.2
