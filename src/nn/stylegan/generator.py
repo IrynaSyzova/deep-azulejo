@@ -48,4 +48,20 @@ class Generator(nn.Module):
 
         self.starting_constant = torch.ones((1, input_channels, 4, 4))
 
+        self.blocks_generate = nn.Sequential(
+            GeneratorBlock(input_channels, hidden_channels, hidden_noise_dim, kernel_size, starting_size=4,
+                           use_upsample=False),
+            GeneratorBlock(hidden_channels, hidden_channels, hidden_noise_dim, kernel_size, starting_size=8),
+            GeneratorBlock(hidden_channels, hidden_channels, hidden_noise_dim, kernel_size, starting_size=16),
+            GeneratorBlock(hidden_channels, hidden_channels, hidden_noise_dim, kernel_size, starting_size=32),
+            GeneratorBlock(hidden_channels, hidden_channels, hidden_noise_dim, kernel_size, starting_size=64)
+        )
+
+        self.blocks_upsample = nn.Sequential(
+            GeneratorBlock(input_channels, hidden_channels, hidden_noise_dim, kernel_size, starting_size=4,
+                           use_upsample=False),
+            GeneratorBlock(hidden_channels, hidden_channels, hidden_noise_dim, kernel_size, starting_size=8),
+            nn.Conv2d(hidden_channels, outpput_channels, kernel_size=1)
+        )
+
     # TODO: finish
