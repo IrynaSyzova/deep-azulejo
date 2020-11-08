@@ -3,6 +3,7 @@ from torch import nn
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+import matplotlib.pyplot as plt
 
 from fastprogress.fastprogress import master_bar, progress_bar
 
@@ -35,6 +36,7 @@ class GAN:
         master_progress_bar = master_bar(range(n_epochs))
         master_progress_bar.names = ['generator', 'critic']
         for epoch in master_progress_bar:
+            generator_losses_epoch, critic_losses_epoch = [], []
             for real_imgs in progress_bar(data_loader, parent=master_progress_bar):
                 batch_size = len(real_imgs)
                 real_imgs = real_imgs.to(self.device)
@@ -43,7 +45,8 @@ class GAN:
                 for _ in range(critic_repeats):
                     self.critic_optimiser.zero_grad()
 
-                    fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
+                    fake_imgs = self.generator(
+                        self.generator.get_noise(batch_size, noise_dimension, device=self.device))
 
                     critic_loss = self.critic.loss(fake_imgs, real_imgs, gradient_penalty_weight, device=self.device)
 
@@ -53,7 +56,7 @@ class GAN:
                     # Update optimizer
                     self.critic_optimiser.step()
 
-                critic_losses.append(mean_critic_loss)
+                critic_losses_epoch.append(mean_critic_loss)
 
                 self.generator_optimiser.zero_grad()
 
@@ -63,12 +66,12 @@ class GAN:
                 generator_loss = self.generator.loss(fake_pred)
                 generator_loss.backward()
                 self.generator_optimiser.step()
-                generator_losses.append(generator_loss.item())
+                generator_losses_epoch.append(generator_loss.item())
 
             print("Epoch {epoch}: Generator loss: {gen_mean}, critic loss: {crit_mean}".format(
                 epoch=epoch,
-                gen_mean=np.mean(generator_losses),
-                crit_mean=np.mean(critic_losses)
+                gen_mean=np.mean(generator_losses_epoch),
+                crit_mean=np.mean(critic_losses_epoch)
             ))
 
             plot_batch(fake_imgs, device=self.device, caption='Generated images')
@@ -80,22 +83,21 @@ class GAN:
             critic_checkpoint_path = '{}/critic_{}.pt'.format(checkpoint_folder, epoch)
 
             save_checkpoint(self.generator, self.generator_optimiser, generator_checkpoint_path, epoch,
-                            np.mean(generator_losses))
-            save_checkpoint(self.critic, self.critic_optimiser, critic_checkpoint_path, epoch, np.mean(critic_losses))
+                            np.mean(generator_losses_epoch))
+            save_checkpoint(self.critic, self.critic_optimiser, critic_checkpoint_path, epoch,
+                            np.mean(critic_losses_epoch))
+
+            generator_losses.append(np.mean(generator_losses_epoch))
+            critic_losses.append(np.mean(critic_losses_epoch))
+
+        self.plot_progress_plot(n_epochs, generator_losses, critic_losses)
 
     @staticmethod
-    def update_progress_plot(epoch, epochs, generator_losses, critic_losses, master_bar):
-        generator_loss = torch.Tensor(generator_losses).view(-1, len(generator_losses))
-        critic_loss = torch.Tensor(critic_losses).view(-1, len(critic_losses))
-        x = range(1, len(generator_loss)+1)
-        y = np.concatenate((generator_loss, critic_loss))
-        graphs = [[x, generator_loss], [x, critic_loss]]
-        x_margin = 0.2
-        y_margin = 0.05
-        x_bounds = [1 - x_margin, epochs + x_margin]
-        y_bounds = [np.min(y) - y_margin, np.max(y) + y_margin]
-
-        master_bar.update_graph(graphs, x_bounds, y_bounds)
+    def plot_progress_plot(epochs, generator_losses, critic_losses):
+        x = range(1, len(epochs) + 1)
+        plt.plot(x, generator_losses, label='generator')
+        plt.plot(x, critic_losses, label='critic')
+        plt.show()
 
 
 def init_weights(layer, std=0.01):
@@ -117,4 +119,3 @@ def save_checkpoint(net, optimiser, path, epoch, loss):
         'optimizer_state_dict': optimiser.state_dict(),
         'loss': loss,
     }, path)
-
