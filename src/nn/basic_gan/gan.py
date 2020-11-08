@@ -70,7 +70,7 @@ class GAN:
             plot_batch(fake_imgs, device=device, caption='Generated images')
             plot_batch(real_imgs, device=device, caption='Real images')
 
-            update_progress_plot(epoch, n_epochs, generator_losses, critic_losses, master_progress_bar)
+            self.update_progress_plot(epoch, n_epochs, generator_losses, critic_losses, master_progress_bar)
 
             generator_checkpoint_path = '{}/generator_{}.pt'.format(checkpoint_folder, epoch)
             critic_checkpoint_path = '{}/critic_{}.pt'.format(checkpoint_folder, epoch)
@@ -78,6 +78,20 @@ class GAN:
             save_checkpoint(self.generator, self.generator_optimiser, generator_checkpoint_path, epoch,
                             np.mean(generator_losses))
             save_checkpoint(self.critic, self.critic_optimiser, critic_checkpoint_path, epoch, np.mean(critic_losses))
+
+    @staticmethod
+    def update_progress_plot(epoch, epochs, generator_losses, critic_losses, master_bar):
+        x = range(1, epoch + 1)
+        generator_loss = torch.Tensor(generator_losses).view(-1, len(generator_losses))
+        critic_loss = torch.Tensor(critic_losses).view(-1, len(critic_losses))
+        y = np.concatenate((generator_loss, critic_loss))
+        graphs = [[x, generator_loss], [x, critic_loss]]
+        x_margin = 0.2
+        y_margin = 0.05
+        x_bounds = [1 - x_margin, epochs + x_margin]
+        y_bounds = [np.min(y) - y_margin, np.max(y) + y_margin]
+
+        master_bar.update_graph(graphs, x_bounds, y_bounds)
 
 
 def init_weights(layer, std=0.01):
@@ -100,16 +114,3 @@ def save_checkpoint(net, optimiser, path, epoch, loss):
         'loss': loss,
     }, path)
 
-
-def update_progress_plot(epoch, epochs, generator_losses, critic_losses, master_bar):
-    x = range(1, epoch + 1)
-    generator_loss = torch.Tensor(generator_losses).view(-1, len(generator_losses))
-    critic_loss = torch.Tensor(critic_losses).view(-1, len(critic_losses))
-    y = np.concatenate((generator_loss, critic_loss))
-    graphs = [[x, generator_loss], [x, critic_loss]]
-    x_margin = 0.2
-    y_margin = 0.05
-    x_bounds = [1 - x_margin, epochs + x_margin]
-    y_bounds = [np.min(y) - y_margin, np.max(y) + y_margin]
-
-    master_bar.update_graph(graphs, x_bounds, y_bounds)
