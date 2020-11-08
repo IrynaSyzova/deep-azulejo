@@ -23,7 +23,7 @@ class Generator(nn.Module):
         )
 
     @staticmethod
-    def _make_block(input_channels, output_channels, kernel_size=5, stride=1):
+    def _make_block(input_channels, output_channels, kernel_size=5, stride=1, padding=0):
         """
         Building block for Generator, which is transposed convolution-batch norm-relu combination
         :param input_channels: input channels size
@@ -32,13 +32,13 @@ class Generator(nn.Module):
         :param stride: stride of the convolution
         """
         return nn.Sequential(
-            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride),
+            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride, padding=padding),
             nn.BatchNorm2d(output_channels),
             nn.ReLU(inplace=True)
         )
 
     @staticmethod
-    def _make_final_block(input_channels, output_channels, kernel_size=5, stride=1):
+    def _make_final_block(input_channels, output_channels, kernel_size=5, stride=1, padding=0):
         """
         Final block for Generator, which is transposed convolution-tanh combination
         :param input_channels: input channels size
@@ -47,7 +47,7 @@ class Generator(nn.Module):
         :param stride: stride of the convolution
         """
         return nn.Sequential(
-            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride),
+            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride, padding=padding),
             nn.Tanh()
         )
 

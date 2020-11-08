@@ -17,7 +17,7 @@ class Critic(nn.Module):
         )
 
     @staticmethod
-    def _make_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.2):
+    def _make_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.2, padding=1):
         """
         Building block for Critic, which is convolution-batch norm-leaky relu combination
         :param input_channels: input channels size
@@ -27,13 +27,13 @@ class Critic(nn.Module):
         :param alpha: Leaky ReLy parameter
         """
         return nn.Sequential(
-            nn.Conv2d(input_channels, output_channels, kernel_size, stride),
+            nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding),
             nn.BatchNorm2d(output_channels),
             nn.LeakyReLU(alpha)
         )
 
     @staticmethod
-    def _make_final_block(input_channels, output_channels, kernel_size=4, stride=2):
+    def _make_final_block(input_channels, output_channels, kernel_size=4, stride=2, padding=1):
         """
         Final block for Critic, which is just a convolution
         :param input_channels: input channels size
@@ -42,7 +42,7 @@ class Critic(nn.Module):
         :param stride: stride of the convolution
         """
         return nn.Sequential(
-            nn.Conv2d(input_channels, output_channels, kernel_size, stride)
+            nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
         )
 
     def forward(self, image):
