@@ -10,13 +10,14 @@ from src.nn.utils import plot_batch
 
 
 class GAN:
-    def __init__(self, generator, critic, optimiser):
-        self.generator = generator
-        self.critic = critic
+    def __init__(self, generator, critic, optimiser, device='cpu'):
+        self.device = device
+        self.generator = generator.to(device)
+        self.critic = critic.to(device)
         self.generator_optimiser = optimiser(generator.parameters())
         self.critic_optimiser = optimiser(critic.parameters())
 
-    def train(self, data_loader, n_epochs, device='cpu',
+    def train(self, data_loader, n_epochs,
               checkpoint_folder=None,
               critic_repeats=5, gradient_penalty_weight=10):
         noise_dimension = self.generator.z_dim
@@ -34,15 +35,15 @@ class GAN:
         for epoch in master_progress_bar:
             for real_imgs in progress_bar(data_loader, parent=master_progress_bar):
                 batch_size = len(real_imgs)
-                real_imgs = real_imgs.to(device)
+                real_imgs = real_imgs.to(self.device)
 
                 mean_critic_loss = 0
                 for _ in range(critic_repeats):
                     self.critic_optimiser.zero_grad()
 
-                    fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=device))
+                    fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
 
-                    critic_loss = self.critic.loss(fake_imgs, real_imgs, gradient_penalty_weight, device=device)
+                    critic_loss = self.critic.loss(fake_imgs, real_imgs, gradient_penalty_weight, device=self.device)
 
                     mean_critic_loss += critic_loss.item() / critic_repeats
 
@@ -54,7 +55,7 @@ class GAN:
 
                 self.generator_optimiser.zero_grad()
 
-                fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=device))
+                fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
                 fake_pred = self.critic(fake_imgs)
 
                 generator_loss = self.generator.loss(fake_pred)
@@ -68,8 +69,8 @@ class GAN:
                 crit_mean=np.mean(critic_losses)
             ))
 
-            plot_batch(fake_imgs, device=device, caption='Generated images')
-            plot_batch(real_imgs, device=device, caption='Real images')
+            plot_batch(fake_imgs, device=self.device, caption='Generated images')
+            plot_batch(real_imgs, device=self.device, caption='Real images')
 
             self.update_progress_plot(epoch, n_epochs, generator_losses, critic_losses, master_progress_bar)
 
