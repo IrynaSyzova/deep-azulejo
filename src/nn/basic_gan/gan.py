@@ -74,7 +74,7 @@ class GAN:
             plot_batch(fake_imgs, device=self.device, caption='Generated images')
             plot_batch(real_imgs, device=self.device, caption='Real images')
 
-            self.update_progress_plot(epoch, n_epochs, generator_losses, critic_losses, master_progress_bar)
+            # self.update_progress_plot(epoch, n_epochs, generator_losses, critic_losses, master_progress_bar)
 
             generator_checkpoint_path = '{}/generator_{}.pt'.format(checkpoint_folder, epoch)
             critic_checkpoint_path = '{}/critic_{}.pt'.format(checkpoint_folder, epoch)
