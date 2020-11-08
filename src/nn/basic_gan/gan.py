@@ -97,8 +97,9 @@ class GAN:
         fig, ax = plt.subplots(2, 1, figsize=(12, 7))
         x = range(1, n_epochs + 1)
         ax[0].plot(x, generator_losses, label='generator')
+        ax[0].set_title('Generator losses')
         ax[1].plot(x, critic_losses, label='critic')
-        plt.legend()
+        ax[1].set_title('Generator losses')
         plt.show()
 
 
