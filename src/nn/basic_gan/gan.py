@@ -93,8 +93,8 @@ class GAN:
         self.plot_progress_plot(n_epochs, generator_losses, critic_losses)
 
     @staticmethod
-    def plot_progress_plot(epochs, generator_losses, critic_losses):
-        x = range(1, len(epochs) + 1)
+    def plot_progress_plot(n_epochs, generator_losses, critic_losses):
+        x = range(1, n_epochs + 1)
         plt.plot(x, generator_losses, label='generator')
         plt.plot(x, critic_losses, label='critic')
         plt.show()
