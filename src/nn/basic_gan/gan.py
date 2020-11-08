@@ -17,7 +17,7 @@ class GAN:
         self.generator_optimiser = optimiser(generator.parameters())
         self.critic_optimiser = optimiser(critic.parameters())
 
-    def train(self, data_loader, n_epochs,
+    def train(self, data_loader, n_epochs, init=True,
               checkpoint_folder=None,
               critic_repeats=5, gradient_penalty_weight=10):
         noise_dimension = self.generator.z_dim
@@ -26,8 +26,10 @@ class GAN:
             checkpoint_folder = "models/basic_gan_{}".format(str(datetime.today().date()))
             Path(checkpoint_folder).mkdir(parents=True, exist_ok=True)
 
-        self.generator.apply(init_weights)
-        self.critic.apply(init_weights)
+        if init:
+            self.generator.apply(init_weights)
+            self.critic.apply(init_weights)
+
         generator_losses, critic_losses = [], []
 
         master_progress_bar = master_bar(range(n_epochs))
