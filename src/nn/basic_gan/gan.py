@@ -1,14 +1,11 @@
 import torch
 from torch import nn
-import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 from datetime import datetime
 
 from fastprogress.fastprogress import master_bar, progress_bar
 
-from src.nn.basic_gan.generator import Generator
-from src.nn.basic_gan.critic import Critic
 from src.nn.utils import plot_batch
 
 
@@ -23,6 +20,10 @@ class GAN:
               checkpoint_folder=None,
               critic_repeats=5, gradient_penalty_weight=10):
         noise_dimension = self.generator.z_dim
+
+        if checkpoint_folder is None:
+            checkpoint_folder = "models/basic_gan_{}".format(str(datetime.today().date()))
+            Path(checkpoint_folder).mkdir(parents=True, exist_ok=True)
 
         self.generator.apply(init_weights)
         self.critic.apply(init_weights)
