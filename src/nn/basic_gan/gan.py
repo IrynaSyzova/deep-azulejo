@@ -17,10 +17,76 @@ class GAN:
         self.critic = critic.to(device)
         self.generator_optimiser = optimiser(generator.parameters())
         self.critic_optimiser = optimiser(critic.parameters())
+        self.__criterion = nn.BCEWithLogitsLoss()
+
+    def __critic_loss(self, fake_imgs, real_imgs):
+        critic_fake_pred = self.critic(fake_imgs.detach())
+        critic_fake_loss = self.__criterion(critic_fake_pred, torch.zeros_like(critic_fake_pred))
+        critic_real_pred = self.critic(real_imgs)
+        critic_real_loss = self.__criterion(critic_real_pred, torch.ones_like(critic_real_pred))
+        return (critic_fake_loss + critic_real_loss) / 2
+
+    def _generator_loss(self, fake_imgs):
+        critic_fake_pred = self.critic(fake_imgs)
+        return self.__criterion(critic_fake_pred, torch.ones_like(critic_fake_pred))
+
+    @staticmethod
+    def __generator_loss_gradient_penalty(critic_fake_pred):
+        """
+        Generator's loss given critic's scores for generated images
+        :param critic_fake_pred: scores for generated images
+        """
+        return critic_fake_pred.mean() * (-1)
+
+    def __critic_loss_gradient_penalty(self, fake_imgs, real_imgs, penalty_weight, device='cpu'):
+        """
+        Loss for critic given predictions on generated and real images
+        :param fake_imgs: generated images
+        :param real_imgs: real images
+        :param penalty_weight: weight of gradient penalty
+        """
+        critic_fake_pred = self.critic(fake_imgs)
+        critic_real_pred = self.critic(real_imgs)
+        epsilon = torch.rand(len(real_imgs), 1, 1, 1, device=device, requires_grad=True)
+        gradient = self.__critic_loss_gradient(fake_imgs, real_imgs, epsilon)
+        gradient_penalty = self.get_gradient_penalty(gradient)
+        return critic_fake_pred.mean() - critic_real_pred.mean() + gradient_penalty * penalty_weight
+
+    def __critic_loss_gradient(self, fake_imgs, real_imgs, epsilon):
+        """
+        Gradient of critic's scores for a mix of real and fake images
+        :param critic: critic
+        :param real_imgs: batch of real images
+        :param fake_imgs: batch of fake images
+        :param epsilon: a parameter to create a fake image from real and fake image
+        """
+        mixed_imgs = real_imgs * epsilon + fake_imgs * (1 - epsilon)
+        mixed_scores = self.critic(mixed_imgs)
+
+        return torch.autograd.grad(
+            inputs=mixed_imgs,
+            outputs=mixed_scores,
+            grad_outputs=torch.ones_like(mixed_scores),
+            create_graph=True,
+            retain_graph=True
+        )[0]
+
+    @staticmethod
+    def get_gradient_penalty(gradient):
+        """
+        Gradient's penalty, which is it's L2 norm
+        :param gradient: gradient we are penalising
+        """
+        gradient = gradient.view(len(gradient), -1)
+
+        gradient_norm = gradient.norm(2, dim=1)
+
+        return sum((gradient_norm - 1) ** 2) / len(gradient_norm)
 
     def train(self, data_loader, n_epochs, init=True,
               checkpoint_folder=None,
-              critic_repeats=5, gradient_penalty_weight=10):
+              critic_repeats=5, gradient_penalty_weight=10, spectral_normalisation=False,
+              generate_imgs_number=32):
         noise_dimension = self.generator.z_dim
 
         if checkpoint_folder is None:
@@ -38,35 +104,16 @@ class GAN:
         for epoch in master_progress_bar:
             generator_losses_epoch, critic_losses_epoch = [], []
             for real_imgs in progress_bar(data_loader, parent=master_progress_bar):
-                batch_size = len(real_imgs)
-                real_imgs = real_imgs.to(self.device)
 
-                mean_critic_loss = 0
-                for _ in range(critic_repeats):
-                    self.critic_optimiser.zero_grad()
+                if spectral_normalisation:
+                    critic_loss, generator_loss = self._step_spectral_normalisation(real_imgs, noise_dimension)
+                else:
+                    critic_loss, generator_loss = self._step_gradient_penalty(real_imgs, noise_dimension,
+                                                                              critic_repeats=critic_repeats,
+                                                                              gradient_penalty_weight=gradient_penalty_weight)
 
-                    fake_imgs = self.generator(
-                        self.generator.get_noise(batch_size, noise_dimension, device=self.device))
-
-                    critic_loss = self.critic.loss(fake_imgs, real_imgs, gradient_penalty_weight, device=self.device)
-
-                    mean_critic_loss += critic_loss.item() / critic_repeats
-
-                    critic_loss.backward(retain_graph=True)
-                    # Update optimizer
-                    self.critic_optimiser.step()
-
-                critic_losses_epoch.append(mean_critic_loss)
-
-                self.generator_optimiser.zero_grad()
-
-                fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
-                fake_pred = self.critic(fake_imgs)
-
-                generator_loss = self.generator.loss(fake_pred)
-                generator_loss.backward()
-                self.generator_optimiser.step()
-                generator_losses_epoch.append(generator_loss.item())
+                critic_losses_epoch.append(critic_loss)
+                generator_losses_epoch.append(generator_loss)
 
             print("Epoch {epoch}: Generator loss: {gen_mean}, critic loss: {crit_mean}".format(
                 epoch=epoch,
@@ -74,8 +121,10 @@ class GAN:
                 crit_mean=np.mean(critic_losses_epoch)
             ))
 
+            fake_imgs = self.generator(
+                self.generator.get_noise(generate_imgs_number, noise_dimension, device=self.device))
+
             plot_batch(fake_imgs, device=self.device, caption='Generated images')
-            plot_batch(real_imgs, device=self.device, caption='Real images')
 
             # self.update_progress_plot(epoch, n_epochs, generator_losses, critic_losses, master_progress_bar)
 
@@ -91,6 +140,56 @@ class GAN:
             critic_losses.append(np.mean(critic_losses_epoch))
 
         self.plot_progress_plot(n_epochs, generator_losses, critic_losses)
+
+    def _step_spectral_normalisation(self, real_imgs, noise_dimension):
+        batch_size = len(real_imgs)
+        real_imgs = real_imgs.to(self.device)
+
+        self.critic_optimiser.zero_grad()
+        fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
+        critic_loss = self.__critic_loss(fake_imgs, real_imgs)
+        critic_loss.backward(retain_graph=True)
+        self.critic_optimiser.step()
+
+        self.generator_optimiser.zero_grad()
+        fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
+        generator_loss = self._generator_loss(fake_imgs)
+        generator_loss.backward()
+        self.generator_optimiser.step()
+
+        return critic_loss.item(), generator_loss.item()
+
+    def _step_gradient_penalty(self, real_imgs, noise_dimension,
+                               critic_repeats=5, gradient_penalty_weight=10):
+        batch_size = len(real_imgs)
+        real_imgs = real_imgs.to(self.device)
+
+        mean_critic_loss = 0
+        for _ in range(critic_repeats):
+            self.critic_optimiser.zero_grad()
+
+            fake_imgs = self.generator(
+                self.generator.get_noise(batch_size, noise_dimension, device=self.device))
+
+            critic_loss = self.__critic_loss_gradient_penalty(fake_imgs, real_imgs, gradient_penalty_weight,
+                                                              device=self.device)
+
+            mean_critic_loss += critic_loss.item() / critic_repeats
+
+            critic_loss.backward(retain_graph=True)
+            # Update optimizer
+            self.critic_optimiser.step()
+
+        self.generator_optimiser.zero_grad()
+
+        fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
+        fake_pred = self.critic(fake_imgs)
+
+        generator_loss = self.__generator_loss_gradient_penalty(fake_pred)
+        generator_loss.backward()
+        self.generator_optimiser.step()
+
+        return mean_critic_loss, generator_loss.item()
 
     @staticmethod
     def plot_progress_plot(n_epochs, generator_losses, critic_losses):

@@ -79,10 +79,3 @@ class Generator(nn.Module):
         """
         return torch.Tensor(truncnorm.rvs(-truncation, truncation, size=(n_samples, z_dim)))
 
-    @staticmethod
-    def loss(critic_fake_pred):
-        """
-        Generator's loss given critic's scores for generated images
-        :param critic_fake_pred: scores for generated images
-        """
-        return critic_fake_pred.mean() * (-1)
