@@ -11,12 +11,12 @@ from src.nn.utils import plot_batch
 
 
 class GAN:
-    def __init__(self, generator, critic, optimiser, device='cpu'):
+    def __init__(self, generator, critic, generator_optimiser, critic_optimiser, device='cpu'):
         self.device = device
         self.generator = generator.to(device)
         self.critic = critic.to(device)
-        self.generator_optimiser = optimiser(generator.parameters())
-        self.critic_optimiser = optimiser(critic.parameters())
+        self.generator_optimiser = generator_optimiser(generator.parameters())
+        self.critic_optimiser = critic_optimiser(critic.parameters())
         self.__criterion = nn.BCEWithLogitsLoss()
 
     def __critic_loss(self, fake_imgs, real_imgs):
@@ -26,7 +26,7 @@ class GAN:
         critic_real_loss = self.__criterion(critic_real_pred, torch.ones_like(critic_real_pred))
         return (critic_fake_loss + critic_real_loss) / 2
 
-    def _generator_loss(self, fake_imgs):
+    def __generator_loss(self, fake_imgs):
         critic_fake_pred = self.critic(fake_imgs)
         return self.__criterion(critic_fake_pred, torch.ones_like(critic_fake_pred))
 
@@ -49,7 +49,7 @@ class GAN:
         critic_real_pred = self.critic(real_imgs)
         epsilon = torch.rand(len(real_imgs), 1, 1, 1, device=device, requires_grad=True)
         gradient = self.__critic_loss_gradient(fake_imgs, real_imgs, epsilon)
-        gradient_penalty = self.get_gradient_penalty(gradient)
+        gradient_penalty = self.__get_gradient_penalty(gradient)
         return critic_fake_pred.mean() - critic_real_pred.mean() + gradient_penalty * penalty_weight
 
     def __critic_loss_gradient(self, fake_imgs, real_imgs, epsilon):
@@ -72,7 +72,7 @@ class GAN:
         )[0]
 
     @staticmethod
-    def get_gradient_penalty(gradient):
+    def __get_gradient_penalty(gradient):
         """
         Gradient's penalty, which is it's L2 norm
         :param gradient: gradient we are penalising
@@ -106,11 +106,11 @@ class GAN:
             for real_imgs in progress_bar(data_loader, parent=master_progress_bar):
 
                 if use_gradient_penalty:
-                    critic_loss, generator_loss = self._step_gradient_penalty(real_imgs, noise_dimension,
-                                                                              critic_repeats=critic_repeats,
-                                                                              gradient_penalty_weight=gradient_penalty_weight)
+                    critic_loss, generator_loss = self.__step_gradient_penalty(real_imgs, noise_dimension,
+                                                                               critic_repeats=critic_repeats,
+                                                                               gradient_penalty_weight=gradient_penalty_weight)
                 else:
-                    critic_loss, generator_loss = self._step(real_imgs, noise_dimension)
+                    critic_loss, generator_loss = self.__step(real_imgs, noise_dimension)
 
                 critic_losses_epoch.append(critic_loss)
                 generator_losses_epoch.append(generator_loss)
@@ -141,7 +141,7 @@ class GAN:
 
         self.plot_progress_plot(n_epochs, generator_losses, critic_losses)
 
-    def _step(self, real_imgs, noise_dimension):
+    def __step(self, real_imgs, noise_dimension, critic_repeats=1):
         batch_size = len(real_imgs)
         real_imgs = real_imgs.to(self.device)
 
@@ -153,14 +153,14 @@ class GAN:
 
         self.generator_optimiser.zero_grad()
         fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
-        generator_loss = self._generator_loss(fake_imgs)
+        generator_loss = self.__generator_loss(fake_imgs)
         generator_loss.backward()
         self.generator_optimiser.step()
 
         return critic_loss.item(), generator_loss.item()
 
-    def _step_gradient_penalty(self, real_imgs, noise_dimension,
-                               critic_repeats=5, gradient_penalty_weight=10):
+    def __step_gradient_penalty(self, real_imgs, noise_dimension,
+                                critic_repeats=5, gradient_penalty_weight=10):
         batch_size = len(real_imgs)
         real_imgs = real_imgs.to(self.device)
 
