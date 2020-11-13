@@ -85,7 +85,7 @@ class GAN:
 
     def train(self, data_loader, n_epochs, init=True,
               checkpoint_folder=None,
-              critic_repeats=5, gradient_penalty_weight=10, spectral_normalisation=False,
+              critic_repeats=5, gradient_penalty_weight=10, use_gradient_penalty_weight=True,
               generate_imgs_number=32):
         noise_dimension = self.generator.z_dim
 
@@ -105,12 +105,12 @@ class GAN:
             generator_losses_epoch, critic_losses_epoch = [], []
             for real_imgs in progress_bar(data_loader, parent=master_progress_bar):
 
-                if spectral_normalisation:
-                    critic_loss, generator_loss = self._step_spectral_normalisation(real_imgs, noise_dimension)
-                else:
+                if use_gradient_penalty_weight:
                     critic_loss, generator_loss = self._step_gradient_penalty(real_imgs, noise_dimension,
                                                                               critic_repeats=critic_repeats,
                                                                               gradient_penalty_weight=gradient_penalty_weight)
+                else:
+                    critic_loss, generator_loss = self._step(real_imgs, noise_dimension)
 
                 critic_losses_epoch.append(critic_loss)
                 generator_losses_epoch.append(generator_loss)
@@ -141,7 +141,7 @@ class GAN:
 
         self.plot_progress_plot(n_epochs, generator_losses, critic_losses)
 
-    def _step_spectral_normalisation(self, real_imgs, noise_dimension):
+    def _step(self, real_imgs, noise_dimension):
         batch_size = len(real_imgs)
         real_imgs = real_imgs.to(self.device)
 
