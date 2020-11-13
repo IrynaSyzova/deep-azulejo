@@ -10,15 +10,19 @@ class Critic(nn.Module):
         """
         super(Critic, self).__init__()
         self.critic = nn.Sequential(
-            self._make_block(channels, hidden_dim, kernel_size=3, stride=1),
-            self._make_block(hidden_dim, hidden_dim * 2, kernel_size=3, stride=2),
-            self._make_block(hidden_dim * 2, hidden_dim * 4, kernel_size=3, stride=2),
+            self._make_block(channels, hidden_dim, kernel_size=3, stride=1,
+                             spectral_normalisation=spectral_normalisation),
+            self._make_block(hidden_dim, hidden_dim * 2, kernel_size=3, stride=2,
+                             spectral_normalisation=spectral_normalisation),
+            self._make_block(hidden_dim * 2, hidden_dim * 4, kernel_size=3, stride=2,
+                             spectral_normalisation=spectral_normalisation),
             self._make_final_block(hidden_dim * 4, 1, kernel_size=4, stride=2,
                                    spectral_normalisation=spectral_normalisation)
         )
 
     @staticmethod
-    def _make_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.2, padding=1):
+    def _make_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.2, padding=1,
+                    spectral_normalisation=False):
         """
         Building block for Critic, which is convolution-batch norm-leaky relu combination
         :param input_channels: input channels size
@@ -27,6 +31,13 @@ class Critic(nn.Module):
         :param stride: stride of the convolution
         :param alpha: Leaky ReLy parameter
         """
+        if spectral_normalisation:
+            return nn.Sequential(
+                nn.utils.spectral_norm(
+                    nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)),
+                nn.BatchNorm2d(output_channels),
+                nn.LeakyReLU(alpha)
+            )
         return nn.Sequential(
             nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding),
             nn.BatchNorm2d(output_channels),
