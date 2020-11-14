@@ -31,16 +31,11 @@ class Critic(nn.Module):
         :param stride: stride of the convolution
         :param alpha: Leaky ReLy parameter
         """
+        layer = nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
         if spectral_normalisation:
-            return nn.Sequential(
-                nn.utils.spectral_norm(
-                    nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
-                ),
-                nn.BatchNorm2d(output_channels),
-                nn.LeakyReLU(alpha)
-            )
+            layer = nn.utils.spectral_norm(layer)
         return nn.Sequential(
-            nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding),
+            layer,
             nn.BatchNorm2d(output_channels),
             nn.LeakyReLU(alpha)
         )
@@ -55,15 +50,10 @@ class Critic(nn.Module):
         :param kernel_size: filter size of the convolution
         :param stride: stride of the convolution
         """
+        layer = nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
         if spectral_normalisation:
-            return nn.Sequential(
-                nn.utils.spectral_norm(
-                    nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
-                )
-            )
-        return nn.Sequential(
-            nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
-        )
+            layer = nn.utils.spectral_norm(layer)
+        return nn.Sequential(layer)
 
     def forward(self, image):
         """
