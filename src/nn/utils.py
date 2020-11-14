@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 import torchvision.utils as vutils
-from torch import nn
+import torch.nn
 import torch
 
 
@@ -36,10 +36,12 @@ def init_weights(layer, std=0.01):
     :param layer: layer for which we initiate the weights
     :param std: weight's std
     """
-    if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.ConvTranspose2d) or isinstance(layer, nn.BatchNorm2d):
-        nn.init.normal_(layer.weight, 0.0, std)
-    if isinstance(layer, nn.BatchNorm2d):
-        nn.init.constant_(layer.bias, 0)
+    if isinstance(layer, torch.nn.Conv2d) or \
+            isinstance(layer, torch.nn.ConvTranspose2d) or \
+            isinstance(layer, torch.nn.BatchNorm2d):
+        torch.nn.init.normal_(layer.weight, 0.0, std)
+    if isinstance(layer, torch.nn.BatchNorm2d):
+        torch.nn.init.constant_(layer.bias, 0)
 
 
 def save_checkpoint(net, optimiser, path, epoch, loss):
