@@ -26,3 +26,24 @@ def new_dim_conv2d(h_in, stride, kernel_size, dilation=1, padding=0, out_padding
 
 def new_dim_conv2d_transpose(h_in, stride, kernel_size, dilation=1, padding=0, out_padding=0):
     return math.floor((h_in + 2*padding +dilation*(kernel_size-1)-1)/stride) + 1
+
+
+def init_weights(layer, std=0.01):
+    """
+    Weights initiation for networks
+    :param layer: layer for which we initiate the weights
+    :param std: weight's std
+    """
+    if isinstance(layer, nn.Conv2d) or isinstance(layer, nn.ConvTranspose2d) or isinstance(layer, nn.BatchNorm2d):
+        nn.init.normal_(layer.weight, 0.0, std)
+    if isinstance(layer, nn.BatchNorm2d):
+        nn.init.constant_(layer.bias, 0)
+
+
+def save_checkpoint(net, optimiser, path, epoch, loss):
+    torch.save({
+        'epoch': epoch,
+        'model_state_dict': net.state_dict(),
+        'optimizer_state_dict': optimiser.state_dict(),
+        'loss': loss,
+    }, path)
