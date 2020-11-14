@@ -32,16 +32,14 @@ class Critic(nn.Module):
         :param stride: stride of the convolution
         :param alpha: Leaky ReLy parameter
         """
-        layer = nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
+        conv_layer = nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
         if spectral_normalisation:
-            layer = nn.utils.spectral_norm(layer)
-        layers = [layer]
+            conv_layer = nn.utils.spectral_norm(conv_layer)
+        layers = [conv_layer]
         if batch_normalisation:
             layers += [nn.BatchNorm2d(output_channels)]
         layers += [nn.LeakyReLU(alpha)]
-        return nn.Sequential(
-            *layers
-        )
+        return nn.Sequential(*layers)
 
     @staticmethod
     def _get_final_block(input_channels, output_channels, kernel_size=4, stride=2, padding=1,
