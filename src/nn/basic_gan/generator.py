@@ -16,14 +16,14 @@ class Generator(nn.Module):
         self.channels = channels
 
         self.generator = nn.Sequential(
-            self._make_block(z_dim, hidden_dim*4, kernel_size=5, stride=2),
-            self._make_block(hidden_dim*4, hidden_dim*2, kernel_size=5, stride=2),
-            self._make_block(hidden_dim*2, hidden_dim, kernel_size=6, stride=2),
-            self._make_final_block(hidden_dim, channels, kernel_size=6, stride=2)
+            self._get_block(z_dim, hidden_dim * 4, kernel_size=5, stride=2),
+            self._get_block(hidden_dim * 4, hidden_dim * 2, kernel_size=5, stride=2),
+            self._get_block(hidden_dim * 2, hidden_dim, kernel_size=6, stride=2),
+            self._get_final_block(hidden_dim, channels, kernel_size=6, stride=2)
         )
 
     @staticmethod
-    def _make_block(input_channels, output_channels, kernel_size=5, stride=1, padding=0):
+    def _get_block(input_channels, output_channels, kernel_size=5, stride=1, padding=0):
         """
         Building block for Generator, which is transposed convolution-batch norm-relu combination
         :param input_channels: input channels size
@@ -38,7 +38,7 @@ class Generator(nn.Module):
         )
 
     @staticmethod
-    def _make_final_block(input_channels, output_channels, kernel_size=5, stride=1, padding=0):
+    def _get_final_block(input_channels, output_channels, kernel_size=5, stride=1, padding=0):
         """
         Final block for Generator, which is transposed convolution-tanh combination
         :param input_channels: input channels size
@@ -78,4 +78,3 @@ class Generator(nn.Module):
         :param truncation: truncation value, the noise will be truncated from -truncation to truncation
         """
         return torch.Tensor(truncnorm.rvs(-truncation, truncation, size=(n_samples, z_dim)))
-

@@ -10,19 +10,19 @@ class Critic(nn.Module):
         """
         super(Critic, self).__init__()
         self.critic = nn.Sequential(
-            self._make_block(channels, hidden_dim, kernel_size=3, stride=1,
-                             spectral_normalisation=spectral_normalisation),
-            self._make_block(hidden_dim, hidden_dim * 2, kernel_size=3, stride=2,
-                             spectral_normalisation=spectral_normalisation),
-            self._make_block(hidden_dim * 2, hidden_dim * 4, kernel_size=3, stride=2,
-                             spectral_normalisation=spectral_normalisation),
-            self._make_final_block(hidden_dim * 4, 1, kernel_size=4, stride=2,
-                                   spectral_normalisation=spectral_normalisation)
+            self._get_block(channels, hidden_dim, kernel_size=3, stride=1,
+                            spectral_normalisation=spectral_normalisation),
+            self._get_block(hidden_dim, hidden_dim * 2, kernel_size=3, stride=2,
+                            spectral_normalisation=spectral_normalisation),
+            self._get_block(hidden_dim * 2, hidden_dim * 4, kernel_size=3, stride=2,
+                            spectral_normalisation=spectral_normalisation),
+            self._get_final_block(hidden_dim * 4, 1, kernel_size=4, stride=2,
+                                  spectral_normalisation=spectral_normalisation)
         )
 
     @staticmethod
-    def _make_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.2, padding=1,
-                    spectral_normalisation=False):
+    def _get_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.2, padding=1,
+                   spectral_normalisation=False):
         """
         Building block for Critic, which is convolution-batch norm-leaky relu combination
         :param input_channels: input channels size
@@ -45,8 +45,8 @@ class Critic(nn.Module):
         )
 
     @staticmethod
-    def _make_final_block(input_channels, output_channels, kernel_size=4, stride=2, padding=1,
-                          spectral_normalisation=False):
+    def _get_final_block(input_channels, output_channels, kernel_size=4, stride=2, padding=1,
+                         spectral_normalisation=False):
         """
         Final block for Critic, which is just a convolution
         :param input_channels: input channels size
