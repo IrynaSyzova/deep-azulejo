@@ -16,16 +16,16 @@ class Generator(nn.Module):
         self.channels = channels
 
         self.generator = nn.Sequential(
-            self._get_block(z_dim, n_features * 8, kernel_size=4, stride=1, padding=0),
-            self._get_block(n_features * 8, n_features * 4, kernel_size=4, stride=2),
-            self._get_block(n_features * 4, n_features * 2, kernel_size=4, stride=2),
-            self._get_block(n_features * 2, n_features, kernel_size=4, stride=2),
-            self._get_block(n_features, n_features, kernel_size=3, stride=1),
-            self._get_final_block(n_features, channels, kernel_size=4, stride=2)
+            self.__get_block(z_dim, n_features * 8, kernel_size=4, stride=1, padding=0),
+            self.__get_block(n_features * 8, n_features * 4, kernel_size=4, stride=2),
+            self.__get_block(n_features * 4, n_features * 2, kernel_size=4, stride=2),
+            self.__get_block(n_features * 2, n_features, kernel_size=4, stride=2),
+            self.__get_block(n_features, n_features, kernel_size=3, stride=1),
+            self.__get_final_block(n_features, channels, kernel_size=4, stride=2)
         )
 
     @staticmethod
-    def _get_block(input_channels, output_channels, kernel_size=5, stride=1, padding=1):
+    def __get_block(input_channels, output_channels, kernel_size=5, stride=1, padding=1):
         """
         Building block for Generator, which is transposed convolution-batch norm-relu combination
         :param input_channels: input channels size
@@ -40,7 +40,7 @@ class Generator(nn.Module):
         )
 
     @staticmethod
-    def _get_final_block(input_channels, output_channels, kernel_size=5, stride=1, padding=0):
+    def __get_final_block(input_channels, output_channels, kernel_size=5, stride=1, padding=0):
         """
         Final block for Generator, which is transposed convolution-tanh combination
         :param input_channels: input channels size

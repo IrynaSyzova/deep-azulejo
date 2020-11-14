@@ -10,24 +10,24 @@ class Critic(nn.Module):
         """
         super(Critic, self).__init__()
         self.critic = nn.Sequential(
-            self._get_block(channels, n_features, kernel_size=4, stride=2,
-                            spectral_normalisation=spectral_normalisation,
-                            batch_normalisation=False),
-            self._get_block(n_features, n_features, kernel_size=3, stride=1, padding=0,
-                            spectral_normalisation=spectral_normalisation),
-            self._get_block(n_features, n_features * 2, kernel_size=4, stride=2,
-                            spectral_normalisation=spectral_normalisation),
-            self._get_block(n_features * 2, n_features * 4, kernel_size=3, stride=2,
-                            spectral_normalisation=spectral_normalisation),
-            self._get_block(n_features * 4, n_features * 8, kernel_size=3, stride=2,
-                            spectral_normalisation=spectral_normalisation),
-            self._get_final_block(n_features * 8, 1, kernel_size=4, stride=1, padding=0,
-                                  spectral_normalisation=spectral_normalisation)
+            self.__get_block(channels, n_features, kernel_size=4, stride=2,
+                             spectral_normalisation=spectral_normalisation,
+                             batch_normalisation=False),
+            self.__get_block(n_features, n_features, kernel_size=3, stride=1, padding=0,
+                             spectral_normalisation=spectral_normalisation),
+            self.__get_block(n_features, n_features * 2, kernel_size=4, stride=2,
+                             spectral_normalisation=spectral_normalisation),
+            self.__get_block(n_features * 2, n_features * 4, kernel_size=3, stride=2,
+                             spectral_normalisation=spectral_normalisation),
+            self.__get_block(n_features * 4, n_features * 8, kernel_size=3, stride=2,
+                             spectral_normalisation=spectral_normalisation),
+            self.__get_final_block(n_features * 8, 1, kernel_size=4, stride=1, padding=0,
+                                   spectral_normalisation=spectral_normalisation)
         )
 
     @staticmethod
-    def _get_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.2, padding=1,
-                   spectral_normalisation=False, batch_normalisation=True):
+    def __get_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.2, padding=1,
+                    spectral_normalisation=False, batch_normalisation=True):
         """
         Building block for Critic, which is convolution-batch norm-leaky relu combination
         :param input_channels: input channels size
@@ -42,12 +42,12 @@ class Critic(nn.Module):
         layers = [conv_layer]
         if batch_normalisation:
             layers += [nn.BatchNorm2d(output_channels)]
-        layers += [nn.LeakyReLU(alpha)]
+        layers += [nn.LeakyReLU(alpha, inplace=True)]
         return nn.Sequential(*layers)
 
     @staticmethod
-    def _get_final_block(input_channels, output_channels, kernel_size=4, stride=2, padding=1,
-                         spectral_normalisation=False):
+    def __get_final_block(input_channels, output_channels, kernel_size=4, stride=2, padding=1,
+                          spectral_normalisation=False):
         """
         Final block for Critic, which is just a convolution
         :param input_channels: input channels size
