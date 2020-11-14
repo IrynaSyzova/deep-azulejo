@@ -4,7 +4,7 @@ from scipy.stats import truncnorm
 
 
 class Generator(nn.Module):
-    def __init__(self, z_dim=100, channels=3, hidden_dim=64):
+    def __init__(self, z_dim=100, channels=3, n_features=64):
         """
         Generator class
 
@@ -16,14 +16,16 @@ class Generator(nn.Module):
         self.channels = channels
 
         self.generator = nn.Sequential(
-            self._get_block(z_dim, hidden_dim * 4, kernel_size=5, stride=2),
-            self._get_block(hidden_dim * 4, hidden_dim * 2, kernel_size=5, stride=2),
-            self._get_block(hidden_dim * 2, hidden_dim, kernel_size=6, stride=2),
-            self._get_final_block(hidden_dim, channels, kernel_size=6, stride=2)
+            self._get_block(z_dim, n_features * 8, kernel_size=4, stride=1, padding=0),
+            self._get_block(n_features * 8, n_features * 4, kernel_size=4, stride=2),
+            self._get_block(n_features * 4, n_features * 2, kernel_size=4, stride=2),
+            self._get_block(n_features * 2, n_features, kernel_size=4, stride=2),
+            self._get_block(n_features, n_features, kernel_size=3, stride=1),
+            self._get_final_block(n_features, channels, kernel_size=4, stride=2)
         )
 
     @staticmethod
-    def _get_block(input_channels, output_channels, kernel_size=5, stride=1, padding=0):
+    def _get_block(input_channels, output_channels, kernel_size=5, stride=1, padding=1):
         """
         Building block for Generator, which is transposed convolution-batch norm-relu combination
         :param input_channels: input channels size

@@ -3,21 +3,25 @@ from torch import nn
 
 
 class Critic(nn.Module):
-    def __init__(self, channels=3, hidden_dim=64, spectral_normalisation=False):
+    def __init__(self, channels=3, n_features=64, spectral_normalisation=False):
         """
         Critic class
         :param channels: number of channels in the images
         """
         super(Critic, self).__init__()
         self.critic = nn.Sequential(
-            self._get_block(channels, hidden_dim, kernel_size=3, stride=1,
+            self._get_block(channels, n_features, kernel_size=4, stride=2,
                             spectral_normalisation=spectral_normalisation,
                             batch_normalisation=False),
-            self._get_block(hidden_dim, hidden_dim * 2, kernel_size=3, stride=2,
+            self._get_block(n_features, n_features, kernel_size=3, stride=1, padding=0,
                             spectral_normalisation=spectral_normalisation),
-            self._get_block(hidden_dim * 2, hidden_dim * 4, kernel_size=3, stride=2,
+            self._get_block(n_features, n_features * 2, kernel_size=4, stride=2,
                             spectral_normalisation=spectral_normalisation),
-            self._get_final_block(hidden_dim * 4, 1, kernel_size=4, stride=2,
+            self._get_block(n_features * 2, n_features * 4, kernel_size=3, stride=2,
+                            spectral_normalisation=spectral_normalisation),
+            self._get_block(n_features * 4, n_features * 8, kernel_size=3, stride=2,
+                            spectral_normalisation=spectral_normalisation),
+            self._get_final_block(n_features * 8, 1, kernel_size=4, stride=1, padding=0,
                                   spectral_normalisation=spectral_normalisation)
         )
 
