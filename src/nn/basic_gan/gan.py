@@ -119,7 +119,7 @@ class GAN:
         ax[0].plot(x, generator_losses, label='generator')
         ax[0].set_title('Generator losses')
         ax[1].plot(x, critic_losses, label='critic')
-        ax[1].set_title('Generator losses')
+        ax[1].set_title('Critic losses')
         plt.show()
 
 
