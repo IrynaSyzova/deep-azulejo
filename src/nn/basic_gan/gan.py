@@ -34,7 +34,7 @@ class GAN:
         critic_fake_loss = self.__criterion(critic_fake_pred, torch.zeros_like(critic_fake_pred))
         critic_real_pred = self.critic(real_imgs)
         critic_real_loss = self.__criterion(critic_real_pred, torch.ones_like(critic_real_pred))
-        return (critic_fake_loss + critic_real_loss) / 2
+        return (critic_fake_loss + critic_real_loss) / 2.
 
     def __generator_loss(self, fake_imgs):
         critic_fake_pred = self.critic(fake_imgs)

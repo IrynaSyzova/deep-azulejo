@@ -34,7 +34,8 @@ class Critic(nn.Module):
         if spectral_normalisation:
             return nn.Sequential(
                 nn.utils.spectral_norm(
-                    nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)),
+                    nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
+                ),
                 nn.BatchNorm2d(output_channels),
                 nn.LeakyReLU(alpha)
             )
