@@ -11,7 +11,8 @@ class Critic(nn.Module):
         super(Critic, self).__init__()
         self.critic = nn.Sequential(
             self._get_block(channels, hidden_dim, kernel_size=3, stride=1,
-                            spectral_normalisation=spectral_normalisation),
+                            spectral_normalisation=spectral_normalisation,
+                            batch_normalisation=False),
             self._get_block(hidden_dim, hidden_dim * 2, kernel_size=3, stride=2,
                             spectral_normalisation=spectral_normalisation),
             self._get_block(hidden_dim * 2, hidden_dim * 4, kernel_size=3, stride=2,
@@ -22,7 +23,7 @@ class Critic(nn.Module):
 
     @staticmethod
     def _get_block(input_channels, output_channels, kernel_size=4, stride=2, alpha=0.2, padding=1,
-                   spectral_normalisation=False):
+                   spectral_normalisation=False, batch_normalisation=True):
         """
         Building block for Critic, which is convolution-batch norm-leaky relu combination
         :param input_channels: input channels size
@@ -34,10 +35,12 @@ class Critic(nn.Module):
         layer = nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
         if spectral_normalisation:
             layer = nn.utils.spectral_norm(layer)
+        layers = [layer]
+        if batch_normalisation:
+            layers += [nn.BatchNorm2d(output_channels)]
+        layers += [nn.LeakyReLU(alpha)]
         return nn.Sequential(
-            layer,
-            nn.BatchNorm2d(output_channels),
-            nn.LeakyReLU(alpha)
+            *layers
         )
 
     @staticmethod
