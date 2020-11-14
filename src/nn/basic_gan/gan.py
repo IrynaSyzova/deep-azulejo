@@ -109,7 +109,7 @@ class GAN:
         generator_loss.backward()
         self.generator_optimiser.step()
 
-        return generator_loss.items()
+        return generator_loss.item()
 
     @staticmethod
     def plot_progress_plot(n_epochs, generator_losses, critic_losses):
