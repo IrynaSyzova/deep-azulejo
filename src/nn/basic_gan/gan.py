@@ -29,17 +29,6 @@ class GAN:
             self.generator.apply(init_weights)
             self.critic.apply(init_weights)
 
-    def __critic_loss(self, fake_imgs, real_imgs):
-        critic_fake_pred = self.critic(fake_imgs.detach())
-        critic_fake_loss = self.__criterion(critic_fake_pred, torch.zeros_like(critic_fake_pred))
-        critic_real_pred = self.critic(real_imgs)
-        critic_real_loss = self.__criterion(critic_real_pred, torch.ones_like(critic_real_pred))
-        return (critic_fake_loss + critic_real_loss) / 2.
-
-    def __generator_loss(self, fake_imgs):
-        critic_fake_pred = self.critic(fake_imgs)
-        return self.__criterion(critic_fake_pred, torch.ones_like(critic_fake_pred))
-
     def train(self, data_loader, n_epochs, show_imgs_number=32):
         noise_dimension = self.generator.z_dim
 
@@ -110,6 +99,17 @@ class GAN:
         self.generator_optimiser.step()
 
         return generator_loss.item()
+
+    def __critic_loss(self, fake_imgs, real_imgs):
+        critic_fake_pred = self.critic(fake_imgs.detach())
+        critic_fake_loss = self.__criterion(critic_fake_pred, torch.zeros_like(critic_fake_pred))
+        critic_real_pred = self.critic(real_imgs)
+        critic_real_loss = self.__criterion(critic_real_pred, torch.ones_like(critic_real_pred))
+        return (critic_fake_loss + critic_real_loss) / 2.
+
+    def __generator_loss(self, fake_imgs):
+        critic_fake_pred = self.critic(fake_imgs)
+        return self.__criterion(critic_fake_pred, torch.ones_like(critic_fake_pred))
 
     @staticmethod
     def plot_progress_plot(n_epochs, generator_losses, critic_losses):
