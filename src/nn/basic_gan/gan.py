@@ -22,8 +22,9 @@ class GAN:
         self.__criterion = nn.BCEWithLogitsLoss()
 
         if checkpoint_folder is None:
-            self.checkpoint_folder = "models/basic_gan_{}".format(str(datetime.today().date()))
-            Path(self.checkpoint_folder).mkdir(parents=True, exist_ok=True)
+            checkpoint_folder = "models/basic_gan_{}".format(str(datetime.today().date()))
+        self.checkpoint_folder = checkpoint_folder
+        Path(self.checkpoint_folder).mkdir(parents=True, exist_ok=True)
 
         if init:
             self.generator.apply(init_weights)
@@ -125,10 +126,10 @@ class GAN:
 class WGAN(GAN):
     def __init__(self, generator, critic, generator_optimiser, critic_optimiser, device='cpu',
                  gradient_penalty_weight=0, critic_repeats=5, checkpoint_folder=None, init=True):
+        if checkpoint_folder is None:
+            checkpoint_folder = "models/wgan_{}".format(str(datetime.today().date()))
         super(WGAN, self).__init__(generator, critic, generator_optimiser, critic_optimiser, device=device,
                                    checkpoint_folder=checkpoint_folder, init=init, critic_repeats=critic_repeats)
-        if checkpoint_folder is None:
-            self.checkpoint_folder = "models/wgan_{}".format(str(datetime.today().date()))
         self.gradient_penalty_weight = gradient_penalty_weight
 
     def __generator_loss(self, fake_imgs):
