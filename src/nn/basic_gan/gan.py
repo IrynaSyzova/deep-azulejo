@@ -125,6 +125,8 @@ class GAN:
 class WGAN(GAN):
     def __init__(self, generator, critic, generator_optimiser, critic_optimiser, device='cpu',
                  gradient_penalty_weight=0, critic_repeats=5, checkpoint_folder=None, init=True):
+        if checkpoint_folder is None:
+            checkpoint_folder = "models/wgan_{}".format(str(datetime.today().date()))
         super(WGAN, self).__init__(generator, critic, generator_optimiser, critic_optimiser, device=device,
                                    checkpoint_folder=checkpoint_folder, init=init, critic_repeats=critic_repeats)
         self.gradient_penalty_weight = gradient_penalty_weight
