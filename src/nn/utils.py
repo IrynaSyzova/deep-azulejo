@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 import torchvision.utils as vutils
+from torch import nn
 
 
 def plot_batch(real_batch, plot_size=32, caption=None, device='cpu'):
