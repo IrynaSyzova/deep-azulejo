@@ -34,7 +34,8 @@ class Generator(nn.Module):
         :param stride: stride of the convolution
         """
         return nn.Sequential(
-            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride, padding=padding),
+            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride, padding=padding, output_padding=0,
+                               dilation=1),
             nn.BatchNorm2d(output_channels),
             nn.ReLU(inplace=True)
         )
@@ -49,7 +50,8 @@ class Generator(nn.Module):
         :param stride: stride of the convolution
         """
         return nn.Sequential(
-            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride, padding=padding),
+            nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride, padding=padding, output_padding=0,
+                               dilation=1),
             nn.Tanh()
         )
 
