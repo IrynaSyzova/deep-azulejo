@@ -44,10 +44,10 @@ class GAN:
                 critic_losses_epoch.append(critic_loss)
                 generator_losses_epoch.append(generator_loss)
 
-            print("Epoch {epoch}: Generator loss: {gen_mean}, critic loss: {crit_mean}".format(
+            print("Epoch {epoch}: Generator loss: {gen_last}, critic loss: {crit_last}".format(
                 epoch=epoch,
-                gen_mean=np.mean(generator_losses_epoch),
-                crit_mean=np.mean(critic_losses_epoch)
+                gen_last=generator_losses_epoch[-1],
+                crit_last=critic_losses_epoch[-1]
             ))
 
             fake_imgs = self.generator(
@@ -61,12 +61,12 @@ class GAN:
             critic_checkpoint_path = '{}/critic_{}.pt'.format(self.checkpoint_folder, epoch)
 
             save_checkpoint(self.generator, self.generator_optimiser, generator_checkpoint_path, epoch,
-                            np.mean(generator_losses_epoch))
+                            generator_losses_epoch[-1])
             save_checkpoint(self.critic, self.critic_optimiser, critic_checkpoint_path, epoch,
-                            np.mean(critic_losses_epoch))
+                            critic_losses_epoch[-1])
 
-            generator_losses.append(np.mean(generator_losses_epoch))
-            critic_losses.append(np.mean(critic_losses_epoch))
+            generator_losses.extend(generator_losses_epoch)
+            critic_losses.extend(critic_losses_epoch)
 
         self.plot_progress_plot(n_epochs, generator_losses, critic_losses)
 
