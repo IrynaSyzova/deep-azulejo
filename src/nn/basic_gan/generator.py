@@ -17,11 +17,11 @@ class Generator(nn.Module):
 
         self.generator = nn.Sequential(
             self.__get_block(z_dim, n_features * 8, kernel_size=4, stride=1, padding=0),
-            self.__get_block(n_features * 8, n_features * 4, kernel_size=4, stride=2),
-            self.__get_block(n_features * 4, n_features * 2, kernel_size=4, stride=2),
-            self.__get_block(n_features * 2, n_features, kernel_size=4, stride=2),
-            self.__get_block(n_features, n_features, kernel_size=3, stride=1),
-            self.__get_final_block(n_features, channels, kernel_size=4, stride=2)
+            self.__get_block(n_features * 8, n_features * 4, kernel_size=4, stride=2, padding=1),
+            self.__get_block(n_features * 4, n_features * 2, kernel_size=4, stride=2, padding=1),
+            self.__get_block(n_features * 2, n_features, kernel_size=4, stride=2, padding=1),
+            self.__get_block(n_features, n_features, kernel_size=3, stride=1, padding=1),
+            self.__get_final_block(n_features, channels, kernel_size=4, stride=2, padding=1)
         )
 
     @staticmethod
