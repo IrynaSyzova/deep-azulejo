@@ -61,22 +61,19 @@ class Generator(nn.Module):
         x = noise.view(len(noise), self.z_dim, 1, 1)
         return self.generator(x)
 
-    @staticmethod
-    def get_noise(n_samples, z_dim, device='cpu'):
+    def get_noise(self, n_samples, device='cpu'):
         """
         Noise vector for Generator
         :param n_samples: number of samples to generate
-        :param z_dim: noise dimension
         :param device: device type
         """
-        return torch.randn(n_samples, z_dim, device=device)
+        return torch.randn(n_samples, self.z_dim, device=device)
 
-    @staticmethod
-    def get_truncated_noise(n_samples, z_dim, truncation):
+    def get_truncated_noise(self, n_samples, truncation):
         """
         Noise vector for Generator of truncated normal distribution
         :param n_samples: number of samples to generate
         :param z_dim: noise dimension
         :param truncation: truncation value, the noise will be truncated from -truncation to truncation
         """
-        return torch.Tensor(truncnorm.rvs(-truncation, truncation, size=(n_samples, z_dim)))
+        return torch.Tensor(truncnorm.rvs(-truncation, truncation, size=(n_samples, self.z_dim)))

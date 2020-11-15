@@ -32,8 +32,6 @@ class GAN:
             self.critic.apply(init_weights)
 
     def train(self, data_loader, n_epochs, show_imgs_number=32):
-        noise_dimension = self.generator.z_dim
-
         generator_losses, critic_losses = [], []
 
         master_progress_bar = master_bar(range(n_epochs))
@@ -41,7 +39,7 @@ class GAN:
         for epoch in master_progress_bar:
             generator_losses_epoch, critic_losses_epoch = [], []
             for real_imgs in progress_bar(data_loader, parent=master_progress_bar):
-                critic_loss, generator_loss = self.__step(real_imgs, noise_dimension)
+                critic_loss, generator_loss = self.__step(real_imgs)
 
                 critic_losses_epoch.append(critic_loss)
                 generator_losses_epoch.append(generator_loss)
@@ -53,7 +51,7 @@ class GAN:
             ))
 
             fake_imgs = self.generator(
-                self.generator.get_noise(show_imgs_number, noise_dimension, device=self.device))
+                self.generator.get_noise(show_imgs_number, device=self.device))
 
             plot_batch(fake_imgs, device=self.device, caption='Generated images')
 
@@ -72,17 +70,17 @@ class GAN:
 
         self.plot_progress_plot(n_epochs, generator_losses, critic_losses)
 
-    def __step(self, real_imgs, noise_dimension):
+    def __step(self, real_imgs):
         batch_size = len(real_imgs)
         real_imgs = real_imgs.to(self.device)
 
         mean_critic_loss = 0
         for _ in range(self.critic_repeats):
-            fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device)).detach()
+            fake_imgs = self.generator(self.generator.get_noise(batch_size, device=self.device)).detach()
             critic_loss = self.__critic_optimiser_step(fake_imgs, real_imgs)
             mean_critic_loss += critic_loss / self.critic_repeats
 
-        fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
+        fake_imgs = self.generator(self.generator.get_noise(batch_size, device=self.device))
         generator_loss = self.__generator_optimiser_step(fake_imgs)
 
         return mean_critic_loss, generator_loss
