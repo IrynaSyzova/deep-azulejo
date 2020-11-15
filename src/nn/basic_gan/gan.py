@@ -78,7 +78,7 @@ class GAN:
 
         mean_critic_loss = 0
         for _ in range(self.critic_repeats):
-            fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device))
+            fake_imgs = self.generator(self.generator.get_noise(batch_size, noise_dimension, device=self.device)).detach()
             critic_loss = self.__critic_optimiser_step(fake_imgs, real_imgs)
             mean_critic_loss += critic_loss / self.critic_repeats
 
@@ -103,7 +103,7 @@ class GAN:
         return generator_loss.item()
 
     def __critic_loss(self, fake_imgs, real_imgs):
-        critic_fake_pred = self.critic(fake_imgs.detach())
+        critic_fake_pred = self.critic(fake_imgs)
         critic_fake_loss = self.__criterion(critic_fake_pred, torch.zeros_like(critic_fake_pred))
         critic_real_pred = self.critic(real_imgs)
         critic_real_loss = self.__criterion(critic_real_pred,

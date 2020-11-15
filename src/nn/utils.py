@@ -37,10 +37,10 @@ def init_weights(layer, std=0.01):
     :param std: weight's std
     """
     if isinstance(layer, torch.nn.Conv2d) or \
-            isinstance(layer, torch.nn.ConvTranspose2d) or \
-            isinstance(layer, torch.nn.BatchNorm2d):
+            isinstance(layer, torch.nn.ConvTranspose2d):
         torch.nn.init.normal_(layer.weight, 0.0, std)
     if isinstance(layer, torch.nn.BatchNorm2d):
+        torch.nn.init.normal_(layer.weight, 0.0, std)
         torch.nn.init.constant_(layer.bias, 0)
 
 
