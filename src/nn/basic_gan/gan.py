@@ -12,13 +12,14 @@ from src.nn.utils import plot_batch, init_weights, save_checkpoint
 
 class GAN:
     def __init__(self, generator, critic, generator_optimiser, critic_optimiser, device='cpu', checkpoint_folder=None,
-                 init=True, critic_repeats=1):
+                 init=True, critic_repeats=1, label_smoothing=0):
         self.device = device
         self.generator = generator.to(device)
         self.critic = critic.to(device)
         self.generator_optimiser = generator_optimiser(generator.parameters())
         self.critic_optimiser = critic_optimiser(critic.parameters())
         self.critic_repeats = critic_repeats
+        self.label_smoothing = label_smoothing
         self.__criterion = nn.BCEWithLogitsLoss()
 
         if checkpoint_folder is None:
@@ -105,7 +106,8 @@ class GAN:
         critic_fake_pred = self.critic(fake_imgs.detach())
         critic_fake_loss = self.__criterion(critic_fake_pred, torch.zeros_like(critic_fake_pred))
         critic_real_pred = self.critic(real_imgs)
-        critic_real_loss = self.__criterion(critic_real_pred, torch.ones_like(critic_real_pred))
+        critic_real_loss = self.__criterion(critic_real_pred,
+                                            torch.ones_like(critic_real_pred) * (1 - self.label_smoothing))
         return (critic_fake_loss + critic_real_loss) / 2.
 
     def __generator_loss(self, fake_imgs):
