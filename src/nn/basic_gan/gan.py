@@ -89,20 +89,20 @@ class GAN:
 
     def __critic_optimiser_step(self, fake_imgs, real_imgs):
         self.critic_optimiser.zero_grad()
-        critic_loss = self.__critic_loss(fake_imgs, real_imgs)
+        critic_loss = self._critic_loss(fake_imgs, real_imgs)
         critic_loss.backward(retain_graph=True)
         self.critic_optimiser.step()
         return critic_loss.item()
 
     def __generator_optimiser_step(self, fake_imgs):
         self.generator_optimiser.zero_grad()
-        generator_loss = self.__generator_loss(fake_imgs)
+        generator_loss = self._generator_loss(fake_imgs)
         generator_loss.backward()
         self.generator_optimiser.step()
 
         return generator_loss.item()
 
-    def __critic_loss(self, fake_imgs, real_imgs):
+    def _critic_loss(self, fake_imgs, real_imgs):
         critic_fake_pred = self.critic(fake_imgs)
         critic_fake_loss = self.__criterion(critic_fake_pred, torch.zeros_like(critic_fake_pred))
         critic_real_pred = self.critic(real_imgs)
@@ -110,7 +110,7 @@ class GAN:
                                             torch.ones_like(critic_real_pred) * (1 - self.label_smoothing))
         return (critic_fake_loss + critic_real_loss) / 2.
 
-    def __generator_loss(self, fake_imgs):
+    def _generator_loss(self, fake_imgs):
         critic_fake_pred = self.critic(fake_imgs)
         return self.__criterion(critic_fake_pred, torch.ones_like(critic_fake_pred))
 
@@ -134,7 +134,7 @@ class WGAN(GAN):
                                    checkpoint_folder=checkpoint_folder, init=init, critic_repeats=critic_repeats)
         self.gradient_penalty_weight = gradient_penalty_weight
 
-    def __generator_loss(self, fake_imgs):
+    def _generator_loss(self, fake_imgs):
         """
         Generator's loss given critic's scores for generated images
         :param critic_fake_pred: scores for generated images
@@ -142,7 +142,7 @@ class WGAN(GAN):
         critic_fake_pred = self.critic(fake_imgs)
         return critic_fake_pred.mean() * (-1)
 
-    def __critic_loss(self, fake_imgs, real_imgs):
+    def _critic_loss(self, fake_imgs, real_imgs):
         """
         Loss for critic given predictions on generated and real images
         :param fake_imgs: generated images
