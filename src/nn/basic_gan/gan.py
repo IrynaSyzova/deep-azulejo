@@ -115,7 +115,7 @@ class GAN:
     @staticmethod
     def plot_progress_plot(n_epochs, generator_losses, critic_losses):
         fig, ax = plt.subplots(2, 1, figsize=(12, 7))
-        x = range(1, n_epochs + 1)
+        x = range(1, len(generator_losses) + 1)
         ax[0].plot(x, generator_losses, label='generator')
         ax[0].set_title('Generator losses')
         ax[1].plot(x, critic_losses, label='critic')
