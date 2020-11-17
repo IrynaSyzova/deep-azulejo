@@ -22,10 +22,10 @@ class Critic(nn.Module):
             self.__get_block(n_features * 2, n_features * 4, kernel_size=3, stride=2,
                              spectral_normalisation=spectral_normalisation,
                              batch_normalisation=batch_normalisation),
-            # self.__get_block(n_features * 4, n_features * 8, kernel_size=3, stride=2,
-            #                  spectral_normalisation=spectral_normalisation,
-            #                  batch_normalisation=batch_normalisation),
-            self.__get_final_block(n_features * 4, 1, kernel_size=4, stride=1, padding=0,
+            self.__get_block(n_features * 4, n_features * 8, kernel_size=3, stride=2,
+                             spectral_normalisation=spectral_normalisation,
+                             batch_normalisation=batch_normalisation),
+            self.__get_final_block(n_features * 8, 1, kernel_size=4, stride=1, padding=0,
                                    spectral_normalisation=spectral_normalisation)
         )
 
