@@ -5,6 +5,8 @@ import torchvision.utils as vutils
 import torch.nn
 import torch
 
+from src.nn.basic_gan.generator import Generator
+
 
 def plot_batch(real_batch, plot_size=32, caption=None, device='cpu'):
     plt.figure(figsize=(16, 16))
@@ -51,3 +53,31 @@ def save_checkpoint(net, optimiser, path, epoch, loss):
         'optimizer_state_dict': optimiser.state_dict(),
         'loss': loss,
     }, path)
+
+
+def show_imgs_by_epoch(folder, noise_dim, epochs, n_imgs_show=32):
+    path = folder+'/{}_{}.pt'
+
+    losses_generator = []
+    losses_critic = []
+
+    for epoch in range(epochs):
+        checkpoint_generator = torch.load(path.format('generator', epoch))
+        loss = checkpoint_generator['loss']
+        losses_generator.append(loss)
+
+        checkpoint_critic = torch.load(path.format('critic', epoch))
+        losses_critic.append(checkpoint_critic['loss'])
+
+        generator = Generator(noise_dim)
+        generator.load_state_dict(checkpoint_generator['model_state_dict'])
+        epoch = checkpoint_generator['epoch']
+        generator.eval()
+
+        print('Epoch {}'.format(epoch))
+        imgs = generator(generator.get_noise(n_imgs_show))
+        plot_batch(imgs)
+
+    plt.plot(losses_generator, label='generator')
+    plt.plot(losses_critic, label='critic')
+    plt.legend()
