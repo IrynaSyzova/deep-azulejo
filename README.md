@@ -16,10 +16,10 @@ In the end there were 1907 images ready for the next steps.
 
 I wanted specific qualities from the images, such as:
 
-    - Image consisting fully of the tile or a grid of tiles
-    - Tile should be symmetric
-    - Detailed
-    - If image is a grid, it should be cut into separate tiles
+- Image consisting fully of the tile or a grid of tiles
+- Tile should be symmetric
+- Detailed
+- If image is a grid, it should be cut into separate tiles
     
 Many of the scrapped images were undesirable for me.
 See [1.1](1.1%20Image%20filtering%20-%20by%20aspect%20ratio.ipynb), [1.2](1.2%20Image%20filtering%20-%20by%20contrast.ipynb), [1.3](1.3%20Image%20filtering%20-%20by%20symmetry.ipynb), [1.4](1.4%20Image%20filtering%20-%20by%20multitile%20search.ipynb), and [1.5](1.5%20Saving%20pre-processed%20images.ipynb) for selection process.
