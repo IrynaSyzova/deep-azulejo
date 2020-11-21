@@ -3,16 +3,16 @@ from torch import nn
 
 
 class Critic(nn.Module):
+    """
+    Critic class
+    :param channels: number of channels in the images
+    :param n_features: controls width of convolution layers
+    :param spectral_normalisation: boolean, whether or not to include spectral normalisation
+        to the layers
+    :param batch_normalisation: boolean, whether or not to include batch normalisation to the layers.
+        Note: first layer never has batch normalisation.
+    """
     def __init__(self, channels=3, n_features=64, spectral_normalisation=False, batch_normalisation=True):
-        """
-        Critic class
-        :param channels: number of channels in the images
-        :param n_features: controls width of convolution layers
-        :param spectral_normalisation: boolean, whether or not to include spectral normalisation
-            to the layers
-        :param batch_normalisation: boolean, whether or not to include batch normalisation to the layers.
-            Note: first layer never has batch normalisation.
-        """
         super(Critic, self).__init__()
         self.critic = nn.Sequential(
             self.__get_block(channels, n_features, kernel_size=4, stride=2,
