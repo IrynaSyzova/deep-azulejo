@@ -7,6 +7,11 @@ class Critic(nn.Module):
         """
         Critic class
         :param channels: number of channels in the images
+        :param n_features: controls width of convolution layers
+        :param spectral_normalisation: boolean, whether or not to include spectral normalisation
+            to the layers
+        :param batch_normalisation: boolean, whether or not to include batch normalisation to the layers.
+            Note: first layer never has batch normalisation.
         """
         super(Critic, self).__init__()
         self.critic = nn.Sequential(
@@ -38,7 +43,11 @@ class Critic(nn.Module):
         :param output_channels: output channel size
         :param kernel_size: filter size of the convolution
         :param stride: stride of the convolution
+        :param padding: padding of the convolution
         :param alpha: Leaky ReLy parameter
+        :param spectral_normalisation: boolean, whether or not to include spectral normalisation
+            to the layer
+        :param batch_normalisation: boolean, whether or not to include batch normalisation to the layer.
         """
         conv_layer = nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
         if spectral_normalisation:
@@ -58,6 +67,10 @@ class Critic(nn.Module):
         :param output_channels: output channel size
         :param kernel_size: filter size of the convolution
         :param stride: stride of the convolution
+        :param padding: padding of the convolution
+        :param spectral_normalisation: boolean, whether or not to include spectral normalisation
+            to the layer
+        :param batch_normalisation: boolean, whether or not to include batch normalisation to the layer.
         """
         layer = nn.Conv2d(input_channels, output_channels, kernel_size, stride, padding=padding)
         if spectral_normalisation:

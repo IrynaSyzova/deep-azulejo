@@ -10,6 +10,7 @@ class Generator(nn.Module):
 
         :param z_dim: input noise dimension
         :param channels: number of channels in the images
+        :param n_features: controls width of convolutional layers
         """
         super(Generator, self).__init__()
         self.z_dim = z_dim
@@ -32,6 +33,7 @@ class Generator(nn.Module):
         :param output_channels: output channel size
         :param kernel_size: filter size of the convolution
         :param stride: stride of the convolution
+        :param padding: padding of the convolution
         """
         return nn.Sequential(
             nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride, padding=padding, output_padding=0,
@@ -48,6 +50,7 @@ class Generator(nn.Module):
         :param output_channels: output channel size
         :param kernel_size: filter size of the convolution
         :param stride: stride of the convolution
+        :param padding: padding of the convolution
         """
         return nn.Sequential(
             nn.ConvTranspose2d(input_channels, output_channels, kernel_size, stride, padding=padding, output_padding=0,

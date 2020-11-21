@@ -28,7 +28,6 @@ def write_image_to_s3(img_array, key):
     Writes image to s3
     :param img_array: image as np.array
     :param key: path in s3 in BUCKET
-    :return: None
     """
     object = BUCKET.Object(key)
     file_stream = BytesIO()

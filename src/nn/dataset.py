@@ -10,9 +10,10 @@ logger = get_logger('dataset')
 
 
 class TileDataset(Dataset):
-    def __init__(self, s3_key, transform):
+    def __init__(self, s3_key, transform = None):
         """
-        :param root_dir: directory with the images
+        :param s3_key: s3 path with the images
+        :param transform: transformation for the images
         """
         # super(TileDataset, self).__init__()
         self.key = s3_key

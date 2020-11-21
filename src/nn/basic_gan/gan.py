@@ -11,15 +11,28 @@ from src.nn.utils import plot_batch, init_weights, save_checkpoint
 
 
 class GAN:
+    """
+    Basic Generative Adversarial Network.
+
+    Attributes:
+        generator: A neural network describing generator part of GAN
+        critic: A neural network describing critic (or discriminator) part of GAN
+        generator_optimiser: Optimiser for generator
+        critic_optimiser: Optimiser for critic
+        device: 'cpu' or 'cuda:0'
+        checkpoint_folder: Where to dave checkpoints; if None, it will be models/basic_gan_<current_date>
+        init: whether to init generator and critic, default True.
+            Set to False if you want to extend previously trained netrworks.
+        critic repeats: Number of critic optimisation steps to 1 generator step
+    """
     def __init__(self, generator, critic, generator_optimiser, critic_optimiser, device='cpu', checkpoint_folder=None,
-                 init=True, critic_repeats=1, label_smoothing=0):
+                 init=True, critic_repeats=1):
         self.device = device
         self.generator = generator.to(device)
         self.critic = critic.to(device)
         self.generator_optimiser = generator_optimiser(generator.parameters())
         self.critic_optimiser = critic_optimiser(critic.parameters())
         self.critic_repeats = critic_repeats
-        self.label_smoothing = label_smoothing
         self.__criterion = nn.BCEWithLogitsLoss()
 
         if checkpoint_folder is None:
@@ -32,6 +45,12 @@ class GAN:
             self.critic.apply(init_weights)
 
     def train(self, data_loader, n_epochs, show_imgs_number=32):
+        """
+        Trains generator and critic of GAN.
+        :param data_loader: Source of data
+        :param n_epochs: Number of epochs to train
+        :param show_imgs_number: How many images to print after each epoch
+        """
         generator_losses, critic_losses = [], []
 
         master_progress_bar = master_bar(range(n_epochs))
@@ -53,7 +72,7 @@ class GAN:
             fake_imgs = self.generator(
                 self.generator.get_noise(show_imgs_number, device=self.device))
 
-            plot_batch(fake_imgs, device=self.device, caption='Generated images')
+            plot_batch(fake_imgs, plot_size=show_imgs_number, caption='Generated images')
 
             # self.update_progress_plot(epoch, n_epochs, generator_losses, critic_losses, master_progress_bar)
 
@@ -68,9 +87,13 @@ class GAN:
             generator_losses.extend(generator_losses_epoch)
             critic_losses.extend(critic_losses_epoch)
 
-        self.plot_progress_plot(n_epochs, generator_losses, critic_losses)
+        self.plot_progress_plot(generator_losses, critic_losses)
 
     def __step(self, real_imgs):
+        """
+        Training step
+        :param real_imgs: Batch of real images to use for optimisation step
+        """
         batch_size = len(real_imgs)
         real_imgs = real_imgs.to(self.device)
 
@@ -104,8 +127,7 @@ class GAN:
         critic_fake_pred = self.critic(fake_imgs)
         critic_fake_loss = self.__criterion(critic_fake_pred, torch.zeros_like(critic_fake_pred))
         critic_real_pred = self.critic(real_imgs)
-        critic_real_loss = self.__criterion(critic_real_pred,
-                                            torch.ones_like(critic_real_pred) * (1 - self.label_smoothing))
+        critic_real_loss = self.__criterion(critic_real_pred, torch.ones_like(critic_real_pred))
         return (critic_fake_loss + critic_real_loss) / 2.
 
     def _generator_loss(self, fake_imgs):
@@ -113,7 +135,10 @@ class GAN:
         return self.__criterion(critic_fake_pred, torch.ones_like(critic_fake_pred))
 
     @staticmethod
-    def plot_progress_plot(n_epochs, generator_losses, critic_losses):
+    def plot_progress_plot(generator_losses, critic_losses):
+        """
+        Plots generator and critic loss progress over epochs
+        """
         fig, ax = plt.subplots(2, 1, figsize=(12, 7))
         x = range(1, len(generator_losses) + 1)
         ax[0].plot(x, generator_losses, label='generator')
@@ -124,6 +149,14 @@ class GAN:
 
 
 class WGAN(GAN):
+    """
+    Wasserstein Generative Adversarial Network.
+
+    Attributes:
+        gradient_penalty_weight: weight of gradient penalty in critic loss
+        checkpoint_folder: Where to dave checkpoints; if None, it will be models/wgan_<current_date>
+
+    """
     def __init__(self, generator, critic, generator_optimiser, critic_optimiser, device='cpu',
                  gradient_penalty_weight=0, critic_repeats=5, checkpoint_folder=None, init=True):
         if checkpoint_folder is None:
@@ -133,20 +166,10 @@ class WGAN(GAN):
         self.gradient_penalty_weight = gradient_penalty_weight
 
     def _generator_loss(self, fake_imgs):
-        """
-        Generator's loss given critic's scores for generated images
-        :param critic_fake_pred: scores for generated images
-        """
         critic_fake_pred = self.critic(fake_imgs)
         return critic_fake_pred.mean() * (-1)
 
     def _critic_loss(self, fake_imgs, real_imgs):
-        """
-        Loss for critic given predictions on generated and real images
-        :param fake_imgs: generated images
-        :param real_imgs: real images
-        :param penalty_weight: weight of gradient penalty
-        """
         critic_fake_pred = self.critic(fake_imgs)
         critic_real_pred = self.critic(real_imgs)
         gradient = self.__critic_loss_gradient(fake_imgs, real_imgs)
