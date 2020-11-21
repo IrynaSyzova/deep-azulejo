@@ -5,7 +5,7 @@ import torchvision.utils as vutils
 import torch.nn
 import torch
 
-from src.nn.basic_gan.generator import Generator
+from src.nn.gan.generator import Generator
 
 
 def plot_batch(image_batch, plot_size=32, caption=None):

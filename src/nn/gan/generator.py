@@ -4,14 +4,14 @@ from scipy.stats import truncnorm
 
 
 class Generator(nn.Module):
-    def __init__(self, z_dim=100, channels=3, n_features=64):
-        """
-        Generator class
+    """
+    Generator class
 
-        :param z_dim: input noise dimension
-        :param channels: number of channels in the images
-        :param n_features: controls width of convolutional layers
-        """
+    :param z_dim: input noise dimension
+    :param channels: number of channels in the images
+    :param n_features: controls width of convolutional layers
+    """
+    def __init__(self, z_dim=100, channels=3, n_features=64):
         super(Generator, self).__init__()
         self.z_dim = z_dim
         self.channels = channels
