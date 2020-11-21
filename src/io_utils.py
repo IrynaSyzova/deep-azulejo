@@ -53,6 +53,12 @@ def read_imgs_from_list(file_list, folder=''):
     :param folder: folder of files; defaults to current
     :return: list of images
     """
+    if not folder:
+        return [
+            cv2.cvtColor(cv2.imread(img_file), cv2.COLOR_BGR2RGB)
+            for img_file in
+            file_list
+        ]
     return [
         cv2.cvtColor(cv2.imread('{}/{}'.format(folder, img_file)), cv2.COLOR_BGR2RGB)
         for img_file in
