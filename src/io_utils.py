@@ -7,14 +7,15 @@ import math
 from src import s3_utils
 
 
-def plot_sample_files_from_list(file_list, folder='', plot_sample=12, cols=6):
+def plot_sample_files_from_list(file_list, folder='', plot_sample=12, cols=6, show=True, savepath=None):
     """
     Plots random sample of images read from file_list
     :param file_list: list of files to print images from
     :param folder: path to files, defaults to current directory
     :param plot_sample: number of images to display
     :param cols: number of columns to arrange images
-    :return: None
+    :param show: True if plot should be printed
+    :param savepath: if not None, will save image at this location
     """
     if plot_sample is None:
         plot_sample = len(file_list)
@@ -24,16 +25,17 @@ def plot_sample_files_from_list(file_list, folder='', plot_sample=12, cols=6):
         folder=folder
     )
     
-    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols)
+    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols, show=show, savepath=savepath)
 
 
-def plot_sample_files_from_s3(key, plot_sample=12, cols=6):
+def plot_sample_files_from_s3(key, plot_sample=12, cols=6, show=True, savepath=None):
     """
     Plots random sample of images from s3 key provided
     :param key: path in s3
     :param plot_sample: number of imgs to display
     :param cols: number of columns to arrange images
-    :return: None
+    :param show: True if plot should be printed
+    :param savepath: if not None, will save image at this location
     """
     file_list = s3_utils.get_image_list_from_s3(key)
 
@@ -43,7 +45,7 @@ def plot_sample_files_from_s3(key, plot_sample=12, cols=6):
     files_to_plot = np.random.choice(file_list, min(plot_sample, len(file_list)), replace=False)
     imgs_to_plot = [s3_utils.read_image_from_s3(file) for file in files_to_plot]
 
-    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols)
+    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols, show=show, savepath=savepath)
 
 
 def read_imgs_from_list(file_list, folder=''):
@@ -75,7 +77,6 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None, show=True, s
     :param plot_sample: number of images to plot
     :param show: True if plot should be printed
     :param savepath: if not None, will save image at this location
-    :return: None
     """
     if plot_sample is None:
         plot_sample = len(img_list)
