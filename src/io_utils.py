@@ -128,10 +128,11 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None, show=True, s
                         )
                 __remove_ax_ticks(ax[row, col])
 
-    if show:
-        plt.show()
     if savepath:
         plt.savefig(savepath)
+    if show:
+        plt.show()
+
     
 
 def plot_metric(x, cut_off):
