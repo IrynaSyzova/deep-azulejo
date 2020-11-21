@@ -66,13 +66,15 @@ def read_imgs_from_list(file_list, folder=''):
     ]
     
 
-def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
+def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None, show=True, savepath=None):
     """
     Given list of images plots a sample of them
     :param img_list: list of images
     :param cols: number of columns to arrange images
     :param rows: number of rows to arrange images
     :param plot_sample: number of images to plot
+    :param show: True if plot should be printed
+    :param savepath: if not None, will save image at this location
     :return: None
     """
     if plot_sample is None:
@@ -124,8 +126,11 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
                          transform = ax[row, col].transAxes
                         )
                 __remove_ax_ticks(ax[row, col])
-        
-    plt.show()
+
+    if show:
+        plt.show()
+    if savepath:
+        plt.savefig(savepath)
     
 
 def plot_metric(x, cut_off):
