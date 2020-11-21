@@ -99,7 +99,7 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None, show=True, s
     else:
         idx_plot = np.random.choice(range(len(img_list)), size=(rows, cols), replace=False)
 
-    _, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
+    fig, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
     # 16 is the right width for my screen
     # height is calculated to keep same distance horizontally and vertically between plotted images
 
@@ -129,7 +129,7 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None, show=True, s
                 __remove_ax_ticks(ax[row, col])
 
     if savepath:
-        plt.tight_layout()
+        fig.tight_layout()
         plt.savefig(savepath)
     if show:
         plt.show()
