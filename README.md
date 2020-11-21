@@ -7,7 +7,9 @@ Steps:
 
 0. Get data by scrapping google and bing
 
-Using notebook [0.1](0.1%20Getting%20data%20using%20ai-utilities.ipynb) I scrapped 1907 images. 
+Using notebook [0.1](0.1%20Getting%20data%20using%20ai-utilities.ipynb) I scrapped images, plus I dowloaded a small sample of images by hand.
+
+In the end there were 1907 images ready for the next steps. 
 ![Crawled images](pics/1_crawled.png)
 
 1. Select usable images from scrapped data: square, symmetric, etc.
