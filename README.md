@@ -30,7 +30,7 @@ In the end I obtained 1808 training worthy images.
 See [2.1](2.1 Testing enriching data.ipynb) and [2.2](2.2 Creating synthetic data.ipynb) for the process.
 
 After all the enriching I had 347635 images in the dataset.
-![Enriched images](pics/3_augmengted.png)
+![Enriched images](pics/3_augmented.png)
 
 3. Using GAN to generate unseen images of tiles
 
@@ -38,5 +38,5 @@ Using WGAP-GP:
 
 ![Generated images](pics/4_generated_v2.png)
 
-Some of then are cool, others are of acquired taste.
+Some of them are cool, others are of acquired taste.
 
