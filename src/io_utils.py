@@ -7,14 +7,15 @@ import math
 from src import s3_utils
 
 
-def plot_sample_files_from_list(file_list, folder='', plot_sample=12, cols=6):
+def plot_sample_files_from_list(file_list, folder='', plot_sample=12, cols=6, show=True, savepath=None):
     """
     Plots random sample of images read from file_list
     :param file_list: list of files to print images from
     :param folder: path to files, defaults to current directory
     :param plot_sample: number of images to display
     :param cols: number of columns to arrange images
-    :return: None
+    :param show: True if plot should be printed
+    :param savepath: if not None, will save image at this location
     """
     if plot_sample is None:
         plot_sample = len(file_list)
@@ -24,16 +25,17 @@ def plot_sample_files_from_list(file_list, folder='', plot_sample=12, cols=6):
         folder=folder
     )
     
-    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols)
+    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols, show=show, savepath=savepath)
 
 
-def plot_sample_files_from_s3(key, plot_sample=12, cols=6):
+def plot_sample_files_from_s3(key, plot_sample=12, cols=6, show=True, savepath=None):
     """
     Plots random sample of images from s3 key provided
     :param key: path in s3
     :param plot_sample: number of imgs to display
     :param cols: number of columns to arrange images
-    :return: None
+    :param show: True if plot should be printed
+    :param savepath: if not None, will save image at this location
     """
     file_list = s3_utils.get_image_list_from_s3(key)
 
@@ -43,7 +45,7 @@ def plot_sample_files_from_s3(key, plot_sample=12, cols=6):
     files_to_plot = np.random.choice(file_list, min(plot_sample, len(file_list)), replace=False)
     imgs_to_plot = [s3_utils.read_image_from_s3(file) for file in files_to_plot]
 
-    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols)
+    plot_sample_imgs(imgs_to_plot, plot_sample=plot_sample, cols=cols, show=show, savepath=savepath)
 
 
 def read_imgs_from_list(file_list, folder=''):
@@ -53,6 +55,12 @@ def read_imgs_from_list(file_list, folder=''):
     :param folder: folder of files; defaults to current
     :return: list of images
     """
+    if not folder:
+        return [
+            cv2.cvtColor(cv2.imread(img_file), cv2.COLOR_BGR2RGB)
+            for img_file in
+            file_list
+        ]
     return [
         cv2.cvtColor(cv2.imread('{}/{}'.format(folder, img_file)), cv2.COLOR_BGR2RGB)
         for img_file in
@@ -60,14 +68,15 @@ def read_imgs_from_list(file_list, folder=''):
     ]
     
 
-def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
+def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None, show=True, savepath=None):
     """
     Given list of images plots a sample of them
     :param img_list: list of images
     :param cols: number of columns to arrange images
     :param rows: number of rows to arrange images
     :param plot_sample: number of images to plot
-    :return: None
+    :param show: True if plot should be printed
+    :param savepath: if not None, will save image at this location
     """
     if plot_sample is None:
         plot_sample = len(img_list)
@@ -90,7 +99,7 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
     else:
         idx_plot = np.random.choice(range(len(img_list)), size=(rows, cols), replace=False)
 
-    _, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
+    fig, ax = plt.subplots(rows, cols, figsize=(16, (16 / cols) * rows))
     # 16 is the right width for my screen
     # height is calculated to keep same distance horizontally and vertically between plotted images
 
@@ -118,8 +127,13 @@ def plot_sample_imgs(img_list, cols=6, rows=None, plot_sample=None):
                          transform = ax[row, col].transAxes
                         )
                 __remove_ax_ticks(ax[row, col])
-        
-    plt.show()
+
+    if savepath:
+        fig.tight_layout()
+        plt.savefig(savepath)
+    if show:
+        plt.show()
+
     
 
 def plot_metric(x, cut_off):

@@ -6,17 +6,21 @@ import numpy as np
 s3_resource = boto3.resource('s3')
 BUCKET = s3_resource.Bucket('iryna-sandbox')
 
-def read_image_from_s3(key):
+
+def read_image_from_s3(key, as_array=True):
     """
     Reads image from s3
     :param key: path in s3 in BUCKET
+    :param as_array: whether to convert image to numpy array
     :return: image as np.array
     """
     object = BUCKET.Object(key)
     response = object.get()
     file_stream = response['Body']
     im = Image.open(file_stream)
-    return np.array(im)
+    if as_array:
+        return np.array(im)
+    return im
 
 
 def write_image_to_s3(img_array, key):
@@ -24,7 +28,6 @@ def write_image_to_s3(img_array, key):
     Writes image to s3
     :param img_array: image as np.array
     :param key: path in s3 in BUCKET
-    :return: None
     """
     object = BUCKET.Object(key)
     file_stream = BytesIO()
