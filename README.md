@@ -36,7 +36,7 @@ After all the enriching I had 347635 images in the dataset.
 
 3. Using GAN to generate unseen images of tiles
 
-Using WGAP-GP (see [3.2.1](3.2.1%20Using%20pytorch%20-%20wgan%20implementation.ipynb) for training code):
+Using WGAN-GP (see [3.2.1](3.2.1%20Using%20pytorch%20-%20wgan%20implementation.ipynb) for training code):
 ![Generated images](pics/4_generated_v2.png)
 
 Some of them are cool, others are of acquired taste.
