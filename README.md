@@ -1,4 +1,6 @@
 # deep-azulejo
+Some of the best results
+![Best images](pics/0_best.png)
 Requirements: [ai_utilities](https://github.com/prairie-guy/ai_utilities.git)
 
 In this project I want to generate images of Portuguese ceramic tiles, also known as [azulejo](https://en.wikipedia.org/wiki/Azulejo).
